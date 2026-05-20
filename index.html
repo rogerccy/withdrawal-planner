@@ -739,7 +739,7 @@
     if(result.canReach||result.alreadyFire) drawAccumChart(buildAccumPts({...inp,...result}),result.fireNumber,result.yearsToFire);
     else drawChartEmpty('chart-svg');
 
-    if(result.fireNumber>0){
+    if((result.canReach||result.alreadyFire)&&result.fireNumber>0){
       const sr=Math.max(0,inp.ret-0.03);
       const sp=result.alreadyFire?inp.savings:result.fireNumber;
       const sa=result.alreadyFire?inp.age:Math.round(result.fireAge||inp.age);
