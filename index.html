@@ -189,6 +189,9 @@
     .event-raise  { color: #70a870; }
     .event-normal { color: var(--muted2); }
     .depleted-row td { color: var(--red) !important; font-style: italic; }
+
+    .solve-btn { background: transparent; border: 1px solid var(--border2); color: var(--muted); font-size: 0.62rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 8px; border-radius: 3px; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: color 0.15s, border-color 0.15s; font-family: inherit; }
+    .solve-btn:hover { color: var(--accent); border-color: var(--accent); }
   </style>
 </head>
 <body>
@@ -281,62 +284,36 @@
           </div>
         </div>
 
-        <!-- 模式切換 / Mode toggle -->
-        <div class="input-row">
-          <label class="form-label" id="label-strategy"></label>
-          <div class="mode-toggle">
-            <button class="mode-btn active" id="mode-fixed"></button>
-            <button class="mode-btn" id="mode-guardrails"></button>
-            <button class="mode-btn" id="mode-dwz"></button>
-          </div>
-        </div>
-
-        <!-- 固定提領 / Fixed SWR -->
-        <div id="fixed-inputs">
-          <div class="input-row" style="margin-bottom:0">
-            <div class="label-row">
-              <label class="form-label" id="label-swr"></label>
-              <button class="tip-btn" data-tip="swr">?</button>
-            </div>
-            <div class="slider-row">
-              <input type="range" id="i-swr" min="2" max="6" step="0.25" value="4">
-              <span class="slider-val" id="v-swr">4%</span>
-            </div>
-          </div>
-        </div>
-
         <!-- 護欄策略 / Guardrails -->
-        <div id="guardrails-inputs" class="hidden">
-          <div class="section-divider" id="divider-guardrails"></div>
-          <div class="input-row">
-            <div class="label-row">
-              <label class="form-label" id="label-iwr"></label>
-              <button class="tip-btn" data-tip="iwr">?</button>
-            </div>
-            <div class="slider-row">
-              <input type="range" id="i-iwr" min="3" max="7" step="0.25" value="5">
-              <span class="slider-val" id="v-iwr">5%</span>
-            </div>
+        <div class="input-row">
+          <div class="label-row">
+            <label class="form-label" id="label-iwr"></label>
+            <button class="tip-btn" data-tip="iwr">?</button>
           </div>
-          <div class="input-row">
-            <div class="label-row">
-              <label class="form-label" id="label-upper"></label>
-              <button class="tip-btn" data-tip="upper">?</button>
-            </div>
-            <div class="slider-row">
-              <input type="range" id="i-upper" min="10" max="40" step="5" value="20">
-              <span class="slider-val" id="v-upper">+20%</span>
-            </div>
+          <div class="slider-row">
+            <input type="range" id="i-iwr" min="1" max="15" step="0.25" value="5">
+            <span class="slider-val" id="v-iwr">5%</span>
+            <button class="solve-btn" id="solve-btn"></button>
           </div>
-          <div class="input-row" style="margin-bottom:0">
-            <div class="label-row">
-              <label class="form-label" id="label-lower"></label>
-              <button class="tip-btn" data-tip="lower">?</button>
-            </div>
-            <div class="slider-row">
-              <input type="range" id="i-lower" min="10" max="40" step="5" value="20">
-              <span class="slider-val" id="v-lower">-20%</span>
-            </div>
+        </div>
+        <div class="input-row">
+          <div class="label-row">
+            <label class="form-label" id="label-upper"></label>
+            <button class="tip-btn" data-tip="upper">?</button>
+          </div>
+          <div class="slider-row">
+            <input type="range" id="i-upper" min="10" max="40" step="5" value="20">
+            <span class="slider-val" id="v-upper">+20%</span>
+          </div>
+        </div>
+        <div class="input-row" style="margin-bottom:0">
+          <div class="label-row">
+            <label class="form-label" id="label-lower"></label>
+            <button class="tip-btn" data-tip="lower">?</button>
+          </div>
+          <div class="slider-row">
+            <input type="range" id="i-lower" min="10" max="40" step="5" value="20">
+            <span class="slider-val" id="v-lower">-20%</span>
           </div>
         </div>
       </div>
@@ -386,22 +363,6 @@
       </div>
     </div>
 
-    <!-- 歸零圖 / Spend-down chart -->
-    <div class="chart-wrap hidden" id="dwz-chart-wrap">
-      <div class="chart-header">
-        <div class="chart-title" id="chart-dwz-title"></div>
-        <div class="chart-legend">
-          <span class="leg-item"><span class="leg-line dwz"></span> <span id="leg-dwz-label"></span></span>
-          <span class="leg-item">
-            <svg width="14" height="8" style="display:inline-block;vertical-align:middle">
-              <line x1="0" y1="4" x2="14" y2="4" stroke="#555" stroke-width="1.5" stroke-dasharray="4 3"/>
-            </svg>
-            &nbsp;<span id="leg-4pct-label"></span>
-          </span>
-        </div>
-      </div>
-      <svg id="dwz-svg" class="chart-svg" viewBox="0 0 800 200" xmlns="http://www.w3.org/2000/svg"></svg>
-    </div>
 
   </div>
 </div>
@@ -431,27 +392,16 @@
       labelExpenses:   'Annual Expenses',
       labelSavings:    'Current Savings / Investments',
       labelReturn:     'Expected Annual Return',
-      labelStrategy:   'Withdrawal Strategy',
-      labelSwr:        'Safe Withdrawal Rate',
       labelIwr:        'Initial Withdrawal Rate',
       labelUpper:      'Upper Guardrail',
       labelLower:      'Lower Guardrail',
-      labelHorizon:    'Retirement Horizon',
       labelDeath:      'Expected Death Age',
-      modeBtnFixed:    'Fixed SWR',
-      modeBtnGuard:    'Guardrails',
-      modeBtnDwz:      'Die With Zero',
-      dividerGuard:    'Guardrails Settings',
-      dividerDwz:      'Die With Zero',
-      sliderYrs:       'yrs',
+      solveBtn:        'Solve for $0',
       chartAccum:      'Portfolio Growth (Accumulation)',
       chartDecu:       'Retirement Simulation (Decumulation)',
       chartTable:      'Withdrawal Schedule',
-      chartDwz:        'Spend-Down to Zero',
       scenStress:      'Stress Test',
       scenBase:        'Base Case',
-      legDwz:          'Die With Zero',
-      leg4pct:         '4% Rule',
       thYear:          'Year',
       thAge:           'Age',
       thPortfolio:     'Portfolio',
@@ -462,8 +412,6 @@
       chartAdjust:     'Adjust your numbers to see a projection',
       chartFireTarget: 'FIRE target',
       chartYrPfx:      'yr',
-      chartAgePfx:     'age',
-      chartUnspent:    'unspent',
       resultSaved:     'of FIRE number saved',
       yearsToFire:     'Years to FIRE',
       fireAge:         'FIRE Age',
@@ -475,12 +423,6 @@
       pctSpent:        '% spent',
       bannerAlready:   'You have reached your FIRE number. You are financially independent.',
       bannerWarning:   'Your expenses exceed your income with no savings buffer. Reduce expenses or increase income to reach FIRE.',
-      dwzAnnualSpend:  'Annual Spend in Retirement',
-      dwzVs4pct:       'vs 4% rule',
-      dwzRetYears:     'Retirement years',
-      dwzTotalW:       'Total cash withdrawn',
-      dwzReturns:      'Of which: investment returns',
-      dwzYearsUnit:    'years',
       gFinalPort:      'Final portfolio',
       gCuts:           'Cuts triggered',
       gRaises:         'Raises triggered',
@@ -508,27 +450,16 @@
       labelExpenses:   '年支出',
       labelSavings:    '目前儲蓄 / 投資',
       labelReturn:     '預期年化報酬率',
-      labelStrategy:   '提領策略',
-      labelSwr:        '安全提領率',
       labelIwr:        '初始提領率',
       labelUpper:      '上限護欄',
       labelLower:      '下限護欄',
-      labelHorizon:    '退休期間',
       labelDeath:      '預期死亡年齡',
-      modeBtnFixed:    '固定提領率',
-      modeBtnGuard:    '護欄策略',
-      modeBtnDwz:      '花到歸零',
-      dividerGuard:    '護欄策略設定',
-      dividerDwz:      '花到歸零',
-      sliderYrs:       '年',
+      solveBtn:        '求解歸零',
       chartAccum:      '投資組合成長（累積階段）',
       chartDecu:       '退休模擬（提領階段）',
       chartTable:      '提領排程',
-      chartDwz:        '花到歸零曲線',
       scenStress:      '壓力測試',
       scenBase:        '基本情境',
-      legDwz:          '花到歸零',
-      leg4pct:         '4%法則',
       thYear:          '年份',
       thAge:           '年齡',
       thPortfolio:     '投資組合',
@@ -539,8 +470,6 @@
       chartAdjust:     '請調整數字以查看預測',
       chartFireTarget: 'FIRE 目標',
       chartYrPfx:      '第',
-      chartAgePfx:     '年齡',
-      chartUnspent:    '未花完',
       resultSaved:     '已達 FIRE 目標',
       yearsToFire:     '距 FIRE 年數',
       fireAge:         'FIRE 年齡',
@@ -552,12 +481,6 @@
       pctSpent:        '% 支出',
       bannerAlready:   '你已達到 FIRE 數字，已實現財務獨立。',
       bannerWarning:   '支出超過收入且無儲蓄緩衝，請降低支出或提高收入以達成 FIRE。',
-      dwzAnnualSpend:  '退休年提領金額',
-      dwzVs4pct:       '對比 4% 法則',
-      dwzRetYears:     '退休年數',
-      dwzTotalW:       '總提領金額',
-      dwzReturns:      '其中：投資報酬',
-      dwzYearsUnit:    '年',
       gFinalPort:      '最終投資組合',
       gCuts:           '削減次數',
       gRaises:         '提高次數',
@@ -581,10 +504,6 @@
       en: { title: 'Expected Annual Return (Real)', body: '"Real" means after subtracting inflation (~3%). The stock market returns ~10% nominally, so ~7% in real terms. Using real returns keeps everything in today\'s dollars — no need to model inflation separately.' },
       zh: { title: '預期年化報酬率（實質）',         body: '「實質」是指扣除通膨（約3%）後的報酬。股市名目報酬約10%，實質約7%。使用實質報酬率可讓所有數字維持在今日幣值，無需另外計算通膨。' }
     },
-    swr: {
-      en: { title: 'Safe Withdrawal Rate',          body: 'The % of your portfolio you withdraw each year in retirement. The 4% rule (Trinity Study, 1994) survived every 30-year historical window including the Great Depression. A $1M portfolio at 4% = $40K/year, theoretically forever.' },
-      zh: { title: '安全提領率',                     body: '退休後每年從投資組合提領的比例。4%法則（1994年 Trinity Study）在每個30年歷史窗口都能存活，包含大蕭條時期。$100萬 × 4% = 每年$4萬，理論上可永久維持。' }
-    },
     firenumber: {
       en: { title: 'FIRE Number',                   body: 'The portfolio size where you can stop working. Calculated as annual expenses ÷ SWR. At 4% that\'s expenses × 25. Once you hit it, investment returns cover your spending without depleting the principal.' },
       zh: { title: 'FIRE 數字',                      body: '可以停止工作的投資組合規模，計算方式為年支出 ÷ 提領率。4%法則下即年支出 × 25。達到後，投資報酬即可支應支出而不動用本金。' }
@@ -601,34 +520,10 @@
       en: { title: 'Lower Guardrail',               body: 'If your portfolio grows and your current withdrawal rate falls below this threshold, raise spending by 10%. Example: start at 5%, lower guardrail -20% → triggers at 4%. Lets you enjoy good market performance.' },
       zh: { title: '下限護欄',                       body: '若投資組合增值導致提領率低於此下限，提高支出10%。例如：起始5%，下限 -20% → 在4%時觸發。讓你享受良好的市場表現。' }
     },
-    horizon: {
-      en: { title: 'Retirement Horizon',             body: 'How many years your portfolio needs to last. Early retirees (40s) may need 40–50 years. Longer horizons generally call for more conservative withdrawal rates or more flexible strategies like Guardrails.' },
-      zh: { title: '退休期間',                       body: '投資組合需要維持的年數。提早退休（40多歲）可能需要40–50年。退休期越長，通常需要更保守的提領率或更靈活的策略。' }
-    },
     death: {
       en: { title: 'Expected Death Age',             body: 'The age at which your portfolio should reach $0. The longer you expect to live, the lower your annual spend (same portfolio spread over more years). Match this with your Memento Mori app setting for consistency.' },
       zh: { title: '預期死亡年齡',                   body: '投資組合應歸零的年齡。預期壽命越長，每年支出越低（相同金額分攤更多年）。建議與 Memento Mori 的設定保持一致。' }
     },
-    dwzmode: {
-      en: { title: 'Die With Zero Mode',             body: 'Calculates the exact annual withdrawal to deplete your portfolio to $0 at your expected death. Based on Bill Perkins\' idea that money unspent at the end of your life represents experiences you chose not to have.' },
-      zh: { title: '花到歸零模式',                   body: '計算剛好能在預期死亡前將投資組合花完的年提領金額。源自 Bill Perkins 的理念：死亡時剩餘的錢，代表你選擇放棄的人生體驗。' }
-    }
-  };
-
-  // 模式說明 / Mode explainer
-  const MODE_EXPLAIN = {
-    fixed: {
-      en: '<strong>Fixed SWR</strong> — Withdraw a set % of your original portfolio each year. The 4% rule survived every 30-year historical period. Simple and safe, but you may die with large unspent wealth.',
-      zh: '<strong>固定提領率</strong> — 每年提領原始投資組合的固定比例。4%法則在每個30年歷史窗口都能存活。簡單且安全，但可能在死亡時留下大量未花完的財富。'
-    },
-    guardrails: {
-      en: '<strong>Guardrails (Guyton-Klinger)</strong> — Start at 5%, then cut spending 10% if markets fall too far, or raise 10% when they recover. Allows a higher starting rate than fixed rules with similar long-term safety.',
-      zh: '<strong>護欄策略（Guyton-Klinger）</strong> — 從5%開始，市場下跌過多時削減支出10%，市場回升時提高10%。在長期安全性相近的情況下，允許比固定法則更高的初始提領率。'
-    },
-    dwz: {
-      en: '<strong>Die With Zero</strong> — The exact annual spend to deplete your portfolio to $0 at your expected death. Frees you to spend more now — money left unspent at death was life energy traded for nothing.',
-      zh: '<strong>花到歸零</strong> — 計算剛好能在預期死亡前將投資組合花完的年提領金額。讓你現在花更多——死亡時未花完的錢，是用生命換來卻什麼都沒有的代價。'
-    }
   };
 
   // ────────────────────────────────────────────────
@@ -655,27 +550,19 @@
     $('label-expenses').textContent = t('labelExpenses');
     $('label-savings').textContent  = t('labelSavings');
     $('label-return').textContent   = t('labelReturn');
-    $('label-strategy').textContent = t('labelStrategy');
-    $('label-swr').textContent      = t('labelSwr');
     $('label-iwr').textContent      = t('labelIwr');
     $('label-upper').textContent    = t('labelUpper');
     $('label-lower').textContent    = t('labelLower');
     $('label-death').textContent    = t('labelDeath');
-    $('mode-fixed').textContent      = t('modeBtnFixed');
-    $('mode-guardrails').textContent = t('modeBtnGuard');
-    $('mode-dwz').textContent        = t('modeBtnDwz');
-    $('divider-guardrails').textContent = t('dividerGuard');
+    $('solve-btn').textContent      = t('solveBtn');
 
     // 圖表標題 / Chart titles
     $('chart-accum-title').textContent = t('chartAccum');
     $('chart-decu-title').textContent  = t('chartDecu');
     $('chart-table-title').textContent = t('chartTable');
-    $('chart-dwz-title').textContent   = t('chartDwz');
     $('chart-empty-text').textContent  = t('chartEmpty');
     $('scen-stress').textContent = t('scenStress');
     $('scen-base').textContent   = t('scenBase');
-    $('leg-dwz-label').textContent  = t('legDwz');
-    $('leg-4pct-label').textContent = t('leg4pct');
 
     // 表格標頭 / Table headers
     $('table-head-row').innerHTML = ['thYear','thAge','thPortfolio','thRate','thWithdraw','thAction']
@@ -728,7 +615,7 @@
   // 狀態 / State
   // ────────────────────────────────────────────────
   const S = { pat: null, gistId: null, local: false, lang: 'en' };
-  let saveTimer = null, MODE = 'fixed', tableScen = 'stress';
+  let saveTimer = null, tableScen = 'stress';
   let lastBaseRows = [], lastStressRows = [];
 
   // ────────────────────────────────────────────────
@@ -749,12 +636,10 @@
         if (c.expenses)$('i-expenses').value = c.expenses;
         if (c.savings) $('i-savings').value  = c.savings;
         if (c.ret)     $('i-return').value   = c.ret;
-        if (c.swr)     $('i-swr').value      = c.swr;
         if (c.iwr)     $('i-iwr').value      = c.iwr;
         if (c.upper)   $('i-upper').value    = c.upper;
         if (c.lower)   $('i-lower').value    = c.lower;
         if (c.death)   $('i-death').value    = c.death;
-        if (c.mode)    setMode(c.mode, false);
       } catch(_) {}
     }
 
@@ -787,20 +672,6 @@
   };
   $('skip-btn').onclick = () => { S.local=true; ls('fire_local','1'); show('main'); calc(); };
 
-  // ────────────────────────────────────────────────
-  // 模式切換 / Mode
-  // ────────────────────────────────────────────────
-  function setMode(m, recalc=true) {
-    MODE = m;
-    ['fixed','guardrails','dwz'].forEach(id => $('mode-'+id).classList.toggle('active', id===m));
-    $('fixed-inputs').classList.toggle('hidden',      m!=='fixed');
-    $('guardrails-inputs').classList.toggle('hidden', m!=='guardrails');
-    if (recalc) calc();
-  }
-  $('mode-fixed').onclick      = () => setMode('fixed');
-  $('mode-guardrails').onclick = () => setMode('guardrails');
-  $('mode-dwz').onclick        = () => setMode('dwz');
-
   $('scen-stress').onclick = () => { tableScen='stress'; $('scen-stress').classList.add('active'); $('scen-base').classList.remove('active'); renderTable(lastStressRows); };
   $('scen-base').onclick   = () => { tableScen='base';   $('scen-base').classList.add('active');   $('scen-stress').classList.remove('active'); renderTable(lastBaseRows); };
 
@@ -809,14 +680,13 @@
   // ────────────────────────────────────────────────
   function syncSliderDisplays() {
     $('v-return').textContent  = $('i-return').value + '%';
-    $('v-swr').textContent     = $('i-swr').value + '%';
     $('v-iwr').textContent     = $('i-iwr').value + '%';
     $('v-upper').textContent   = '+' + $('i-upper').value + '%';
     $('v-lower').textContent   = '-' + $('i-lower').value + '%';
     $('v-death').textContent   = $('i-death').value;
   }
 
-  ['i-age','i-income','i-expenses','i-savings','i-return','i-swr','i-iwr','i-upper','i-lower','i-death']
+  ['i-age','i-income','i-expenses','i-savings','i-return','i-iwr','i-upper','i-lower','i-death']
     .forEach(id => $(id).addEventListener('input', () => { syncSliderDisplays(); calc(); scheduleSave(); }));
 
   function scheduleSave() { clearTimeout(saveTimer); saveTimer = setTimeout(persist, 1200); }
@@ -832,12 +702,10 @@
       expenses: Math.max(0,    +$('i-expenses').value || 0),
       savings:  Math.max(0,    +$('i-savings').value  || 0),
       ret:      Math.max(0,    +$('i-return').value   || 7) / 100,
-      swr:      Math.max(0.01, +$('i-swr').value      || 4) / 100,
       iwr:      Math.max(0.01, +$('i-iwr').value      || 5) / 100,
       upper:    Math.max(1,    +$('i-upper').value    || 20),
       lower:    Math.max(1,    +$('i-lower').value    || 20),
       deathAge: Math.max(50,   +$('i-death').value    || 85),
-      mode: MODE,
     };
   }
 
@@ -845,7 +713,7 @@
   // 計算 / Calculations
   // ────────────────────────────────────────────────
   function calcFIRE(inp) {
-    const er=inp.mode==='guardrails'?inp.iwr:inp.swr;
+    const er=inp.iwr;
     const fireNumber=inp.expenses/er, annualSavings=inp.income-inp.expenses;
     const savingsRate=inp.income>0?annualSavings/inp.income:0;
     const progress=fireNumber>0?Math.min(1,inp.savings/fireNumber):1;
@@ -860,9 +728,6 @@
   }
 
   function buildAccumPts({savings,annualSavings,ret,yearsToFire}){const years=yearsToFire!=null?Math.min(Math.ceil(yearsToFire)+8,70):60;const pts=[];let v=savings;for(let t=0;t<=years;t++){pts.push({t,v});v=v*(1+ret)+annualSavings;if(v<0)v=0;}return pts;}
-  function calcDWZ(portfolio,ret,fireAge,deathAge){const N=Math.round(deathAge-fireAge);if(N<=0)return{valid:false};const annualSpend=ret===0?portfolio/N:portfolio*ret/(1-Math.pow(1+ret,-N));const spend4=portfolio*0.04;return{valid:true,annualSpend,N,spend4,uplift:annualSpend-spend4,upliftPct:(annualSpend-spend4)/spend4*100,totalSpend:annualSpend*N,returns:annualSpend*N-portfolio};}
-  function buildDWZPts(portfolio,annualSpend,ret,fireAge,N){const pts=[];let v=portfolio;for(let t=0;t<=N;t++){pts.push({t,age:Math.round(fireAge)+t,v:Math.max(0,v)});v=v*(1+ret)-annualSpend;}return pts;}
-  function build4PctPts(portfolio,ret,fireAge,N){const s4=portfolio*0.04;const pts=[];let v=portfolio;for(let t=0;t<=N;t++){pts.push({t,age:Math.round(fireAge)+t,v:Math.max(0,v)});v=v*(1+ret)-s4;}return pts;}
   function simulateDecumulation(sp,is,ret,iwr,up,lo,h,sa){const rows=[];let port=sp,spend=is;const ut=iwr*(1+up/100),lt=iwr*(1-lo/100);rows.push({year:0,age:sa,portfolioStart:port,currentRate:iwr*100,withdraw:0,event:'start',portfolioEnd:port});for(let y=1;y<=h;y++){const ps=port*(1+ret),cr=ps>0?spend/ps:Infinity;let ev='normal';if(cr>ut){spend*=0.90;ev='cut';}else if(cr<lt){spend*=1.10;ev='raise';}const pe=Math.max(0,ps-spend);rows.push({year:y,age:sa+y,portfolioStart:ps,currentRate:cr*100,withdraw:spend,event:ev,portfolioEnd:pe});port=pe;if(port<=0)break;}return rows;}
 
   // ────────────────────────────────────────────────
@@ -874,7 +739,7 @@
     if(result.canReach||result.alreadyFire) drawAccumChart(buildAccumPts({...inp,...result}),result.fireNumber,result.yearsToFire);
     else drawChartEmpty('chart-svg');
 
-    if(MODE==='guardrails'&&result.fireNumber>0){
+    if(result.fireNumber>0){
       const sr=Math.max(0,inp.ret-0.03);
       const sp=result.alreadyFire?inp.savings:result.fireNumber;
       const sa=result.alreadyFire?inp.age:Math.round(result.fireAge||inp.age);
@@ -892,21 +757,13 @@
       $('decu-chart-wrap').classList.add('hidden');
       $('table-wrap').classList.add('hidden');
     }
-
-    if(MODE==='dwz'&&result.fireNumber>0){
-      const sp=result.alreadyFire?inp.savings:result.fireNumber;
-      const fa=result.alreadyFire?inp.age:(result.fireAge||inp.age);
-      const dwz=calcDWZ(sp,inp.ret,fa,inp.deathAge);
-      if(dwz.valid){renderDWZSection(dwz);drawDWZChart(buildDWZPts(sp,dwz.annualSpend,inp.ret,fa,dwz.N),build4PctPts(sp,inp.ret,fa,dwz.N),sp,fa,inp.deathAge);$('dwz-chart-wrap').classList.remove('hidden');}
-      else $('dwz-chart-wrap').classList.add('hidden');
-    } else $('dwz-chart-wrap').classList.add('hidden');
   }
 
   // ────────────────────────────────────────────────
   // 渲染結果 / Render results
   // ────────────────────────────────────────────────
   function renderResults(inp, r) {
-    let html = `<div class="mode-explainer">${MODE_EXPLAIN[MODE][S.lang] || MODE_EXPLAIN[MODE].en}</div>`;
+    let html = '';
     if (r.alreadyFire)
       html += `<div class="banner success">${t('bannerAlready')}</div>`;
     else if (!r.canReach)
@@ -941,21 +798,6 @@
     }
     html += `<div id="mode-extra"></div>`;
     $('results-content').innerHTML = html;
-  }
-
-  function renderDWZSection(dwz) {
-    const el=$('mode-extra'); if(!el) return;
-    const s=dwz.uplift>=0?'+':'';
-    el.innerHTML=`<div class="dwz-spend-block">
-      <div class="dwz-spend-label">${t('dwzAnnualSpend')}</div>
-      <div class="dwz-spend-val">${fmtMoney(dwz.annualSpend)}</div>
-      <div class="dwz-spend-sub">${t('dwzVs4pct')} ${fmtMoney(dwz.spend4)}/yr &nbsp;
-        <span class="dwz-uplift">${s}${fmtMoney(dwz.uplift)} (${s}${dwz.upliftPct.toFixed(0)}%)</span></div>
-      <div class="dwz-stats">
-        <div class="dwz-stat-row"><span>${t('dwzRetYears')}</span><span>${dwz.N} ${t('dwzYearsUnit')}</span></div>
-        <div class="dwz-stat-row"><span>${t('dwzTotalW')}</span><span>${fmtMoney(dwz.totalSpend)}</span></div>
-        <div class="dwz-stat-row"><span>${t('dwzReturns')}</span><span>${fmtMoney(Math.max(0,dwz.returns))}</span></div>
-      </div></div>`;
   }
 
   function renderGuardrailsSummary(inp, baseRows, stressRows) {
@@ -1021,25 +863,6 @@
     $('decu-svg').innerHTML=`<clipPath id="dc"><rect x="${DPL}" y="${DPT}" width="${DIW}" height="${DIH}"/></clipPath>${gl}${yl}${xl}<g clip-path="url(#dc)"><polyline points="${bl}" fill="none" stroke="#e8e8e8" stroke-width="1.5" stroke-linejoin="round" opacity="0.5"/><polyline points="${sl}" fill="none" stroke="#c8a96e" stroke-width="1.5" stroke-linejoin="round"/>${ed}</g><line x1="${DPL}" y1="${DPT}" x2="${DPL}" y2="${DPT+DIH}" stroke="#2a2a2a" stroke-width="1"/><line x1="${DPL}" y1="${DPT+DIH}" x2="${DPL+DIW}" y2="${DPT+DIH}" stroke="#2a2a2a" stroke-width="1"/>`;
   }
 
-  const ZCW=800,ZCH=200,ZPL=64,ZPR=24,ZPT=14,ZPB=36,ZIW=ZCW-ZPL-ZPR,ZIH=ZCH-ZPT-ZPB;
-
-  function drawDWZChart(dwzPts, r4Pts, sp, fireAge, deathAge) {
-    const av=[...dwzPts,...r4Pts].map(p=>p.v);
-    const maxV=Math.max(sp*1.15,...av,1),N=deathAge-Math.round(fireAge);
-    const xS=t=>ZPL+(t/N)*ZIW,yS=v=>ZPT+ZIH-(Math.max(0,v)/maxV)*ZIH;
-    let gl='',yl='';for(let i=0;i<=4;i++){const v=maxV*i/4,y=yS(v);gl+=`<line x1="${ZPL}" y1="${y}" x2="${ZPL+ZIW}" y2="${y}" stroke="#1a1a1a" stroke-width="1"/>`;yl+=`<text x="${ZPL-8}" y="${y+4}" text-anchor="end" fill="#888" font-size="10">${fmtMoney(v)}</text>`;}
-    let xl='';const step=N<=20?5:N<=40?10:15;for(let yr=0;yr<=N;yr+=step){const age=Math.round(fireAge)+yr;xl+=`<text x="${xS(yr)}" y="${ZPT+ZIH+18}" text-anchor="middle" fill="#888" font-size="10">${t('chartAgePfx')} ${age}</text>`;}
-    const r4p=r4Pts.map(p=>`${xS(p.t)},${yS(p.v)}`).join(' ');
-    const lr4=r4Pts[r4Pts.length-1];
-    const r4lbl=lr4.v>0?`<text x="${xS(lr4.t)-6}" y="${yS(lr4.v)-8}" text-anchor="end" fill="#888" font-size="9">${fmtMoney(lr4.v)} ${t('chartUnspent')}</text>`:'';
-    const dp=dwzPts.map(p=>`${xS(p.t)},${yS(p.v)}`).join(' ');
-    const da=`M${xS(0)},${ZPT+ZIH} L${xS(0)},${yS(dwzPts[0].v)} `+dwzPts.slice(1).map(p=>`L${xS(p.t)},${yS(p.v)}`).join(' ')+` L${xS(dwzPts[dwzPts.length-1].t)},${ZPT+ZIH} Z`;
-    let ms='';for(let t=10;t<N;t+=10){const i=dwzPts.findIndex(p=>p.t>=t);if(i>=0){const p=dwzPts[i];ms+=`<circle cx="${xS(p.t)}" cy="${yS(p.v)}" r="3" fill="#1a1a1a" stroke="#c8a96e" stroke-width="1.5"/>`;}}
-    const ld=dwzPts[dwzPts.length-1];
-    const td=`<circle cx="${xS(ld.t)}" cy="${yS(ld.v)}" r="5" fill="#c8a96e"/><circle cx="${xS(ld.t)}" cy="${yS(ld.v)}" r="9" fill="none" stroke="#c8a96e" stroke-width="1" opacity="0.4"/><text x="${xS(ld.t)}" y="${yS(ld.v)-10}" text-anchor="middle" fill="#c8a96e" font-size="9">$0</text>`;
-    $('dwz-svg').innerHTML=`<defs><linearGradient id="zg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#c8a96e" stop-opacity="0.1"/><stop offset="100%" stop-color="#c8a96e" stop-opacity="0"/></linearGradient><clipPath id="zc"><rect x="${ZPL}" y="${ZPT}" width="${ZIW}" height="${ZIH}"/></clipPath></defs>${gl}${yl}${xl}<g clip-path="url(#zc)"><polyline points="${r4p}" fill="none" stroke="#555" stroke-width="1.5" stroke-dasharray="6 4"/>${r4lbl}<path d="${da}" fill="url(#zg)"/><polyline points="${dp}" fill="none" stroke="#c8a96e" stroke-width="2" stroke-linejoin="round"/>${ms}${td}</g><line x1="${ZPL}" y1="${ZPT}" x2="${ZPL}" y2="${ZPT+ZIH}" stroke="#2a2a2a" stroke-width="1"/><line x1="${ZPL}" y1="${ZPT+ZIH}" x2="${ZPL+ZIW}" y2="${ZPT+ZIH}" stroke="#2a2a2a" stroke-width="1"/>`;
-  }
-
   function renderTable(rows) {
     $('table-body').innerHTML=rows.filter(r=>r.year>0).map(r=>{
       const dep=r.portfolioEnd<=0,rc=dep?'depleted-row':r.event==='cut'?'row-cut':r.event==='raise'?'row-raise':'';
@@ -1053,15 +876,44 @@
   }
 
   // ────────────────────────────────────────────────
+  // 求解歸零 IWR / Solve for $0
+  // ────────────────────────────────────────────────
+  function solveIWR() {
+    const inp = getInputs();
+    if (inp.expenses <= 0 || inp.deathAge <= inp.age) return;
+    let lo = 0.005, hi = 0.60;
+    for (let i = 0; i < 60; i++) {
+      const mid = (lo + hi) / 2;
+      const testInp = {...inp, iwr: mid};
+      const result = calcFIRE(testInp);
+      if (!result.canReach && !result.alreadyFire) { lo = mid; continue; }
+      const sp = result.alreadyFire ? inp.savings : result.fireNumber;
+      const sa = result.alreadyFire ? inp.age : Math.round(result.fireAge || inp.age);
+      const horizon = Math.max(1, Math.round(inp.deathAge - sa));
+      const rows = simulateDecumulation(sp, inp.expenses, inp.ret, mid, inp.upper, inp.lower, horizon, sa);
+      const finalPort = rows[rows.length - 1].portfolioEnd;
+      if (finalPort > 0) lo = mid;
+      else hi = mid;
+    }
+    const solved = Math.round((lo + hi) / 2 * 400) / 400; // nearest 0.25%
+    $('i-iwr').value = (solved * 100).toFixed(2);
+    syncSliderDisplays();
+    calc();
+    scheduleSave();
+  }
+
+  $('solve-btn').onclick = solveIWR;
+
+  // ────────────────────────────────────────────────
   // Gist API
   // ────────────────────────────────────────────────
   function ghFetch(p,path,o={}){return fetch(API+path,{...o,headers:{'Authorization':`token ${p}`,'Content-Type':'application/json',...(o.headers||{})}});}
   async function findGist(p){for(let pg=1;;pg++){const r=await ghFetch(p,`/gists?per_page=100&page=${pg}`);if(!r.ok)return null;const l=await r.json();const h=l.find(g=>g.files[GF]);if(h){const f=await ghFetch(p,`/gists/${h.id}`);return f.ok?f.json():null;}if(l.length<100)return null;}}
-  function applyGist(g){try{const c=JSON.parse(g.files[GF].content);if(c.age)$('i-age').value=c.age;if(c.income)$('i-income').value=c.income;if(c.expenses)$('i-expenses').value=c.expenses;if(c.savings)$('i-savings').value=c.savings;if(c.ret)$('i-return').value=c.ret;if(c.swr)$('i-swr').value=c.swr;if(c.iwr)$('i-iwr').value=c.iwr;if(c.upper)$('i-upper').value=c.upper;if(c.lower)$('i-lower').value=c.lower;if(c.death)$('i-death').value=c.death;if(c.mode)setMode(c.mode,false);}catch(_){}}
+  function applyGist(g){try{const c=JSON.parse(g.files[GF].content);if(c.age)$('i-age').value=c.age;if(c.income)$('i-income').value=c.income;if(c.expenses)$('i-expenses').value=c.expenses;if(c.savings)$('i-savings').value=c.savings;if(c.ret)$('i-return').value=c.ret;if(c.iwr)$('i-iwr').value=c.iwr;if(c.upper)$('i-upper').value=c.upper;if(c.lower)$('i-lower').value=c.lower;if(c.death)$('i-death').value=c.death;}catch(_){}}
   async function pushGist(cfg){if(!S.pat)return;setBadge(t('syncing'));const body={description:'FIRE Calculator — settings',public:false,files:{[GF]:{content:JSON.stringify(cfg,null,2)}}};const url=S.gistId?`/gists/${S.gistId}`:'/gists';const method=S.gistId?'PATCH':'POST';const r=await ghFetch(S.pat,url,{method,body:JSON.stringify(body)});if(r.ok){const g=await r.json();S.gistId=g.id;ls('fire_gist_id',g.id);setBadge(t('synced'),'ok');}else setBadge(t('syncFailed'),'bad');}
   async function pullGist(){try{setBadge(t('syncing'));const r=await ghFetch(S.pat,`/gists/${S.gistId}`);if(!r.ok){setBadge('');return;}applyGist(await r.json());syncSliderDisplays();calc();setBadge(t('synced'),'ok');}catch(_){setBadge('');}}
 
-  function persist(){const i=getInputs();const c={age:i.age,income:i.income,expenses:i.expenses,savings:i.savings,ret:$('i-return').value,swr:$('i-swr').value,iwr:$('i-iwr').value,upper:$('i-upper').value,lower:$('i-lower').value,death:$('i-death').value,mode:MODE};ls('fire_cfg',JSON.stringify(c));if(S.pat)pushGist(c);}
+  function persist(){const i=getInputs();const c={age:i.age,income:i.income,expenses:i.expenses,savings:i.savings,ret:$('i-return').value,iwr:$('i-iwr').value,upper:$('i-upper').value,lower:$('i-lower').value,death:$('i-death').value};ls('fire_cfg',JSON.stringify(c));if(S.pat)pushGist(c);}
   function ls(k,v){if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v);}
   function setBadge(txt,cls=''){const e=$('sync-badge');e.textContent=txt;e.className='sync-badge'+(cls?' '+cls:'');}
   function fmtMoney(n){if(!isFinite(n)||isNaN(n))return'—';if(n>=1e6)return'$'+(n/1e6).toFixed(2).replace(/\.?0+$/,'')+'M';if(n>=1e3)return'$'+Math.round(n/1e3)+'K';return'$'+Math.round(n).toLocaleString();}
