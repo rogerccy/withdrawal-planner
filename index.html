@@ -270,6 +270,16 @@
             <span class="slider-val" id="v-return">7%</span>
           </div>
         </div>
+        <div class="input-row">
+          <div class="label-row">
+            <label class="form-label" id="label-death"></label>
+            <button class="tip-btn" data-tip="death">?</button>
+          </div>
+          <div class="slider-row">
+            <input type="range" id="i-death" min="50" max="120" step="1" value="85">
+            <span class="slider-val" id="v-death">85</span>
+          </div>
+        </div>
 
         <!-- 模式切換 / Mode toggle -->
         <div class="input-row">
@@ -318,7 +328,7 @@
               <span class="slider-val" id="v-upper">+20%</span>
             </div>
           </div>
-          <div class="input-row">
+          <div class="input-row" style="margin-bottom:0">
             <div class="label-row">
               <label class="form-label" id="label-lower"></label>
               <button class="tip-btn" data-tip="lower">?</button>
@@ -326,31 +336,6 @@
             <div class="slider-row">
               <input type="range" id="i-lower" min="10" max="40" step="5" value="20">
               <span class="slider-val" id="v-lower">-20%</span>
-            </div>
-          </div>
-          <div class="input-row" style="margin-bottom:0">
-            <div class="label-row">
-              <label class="form-label" id="label-horizon"></label>
-              <button class="tip-btn" data-tip="horizon">?</button>
-            </div>
-            <div class="slider-row">
-              <input type="range" id="i-horizon" min="15" max="50" step="5" value="30">
-              <span class="slider-val" id="v-horizon">30 yrs</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- 歸零模式 / Die With Zero -->
-        <div id="dwz-inputs" class="hidden">
-          <div class="section-divider" id="divider-dwz"></div>
-          <div class="input-row" style="margin-bottom:0">
-            <div class="label-row">
-              <label class="form-label" id="label-death"></label>
-              <button class="tip-btn" data-tip="death">?</button>
-            </div>
-            <div class="slider-row">
-              <input type="range" id="i-death" min="50" max="120" step="1" value="85">
-              <span class="slider-val" id="v-death">85</span>
             </div>
           </div>
         </div>
@@ -675,13 +660,11 @@
     $('label-iwr').textContent      = t('labelIwr');
     $('label-upper').textContent    = t('labelUpper');
     $('label-lower').textContent    = t('labelLower');
-    $('label-horizon').textContent  = t('labelHorizon');
     $('label-death').textContent    = t('labelDeath');
     $('mode-fixed').textContent      = t('modeBtnFixed');
     $('mode-guardrails').textContent = t('modeBtnGuard');
     $('mode-dwz').textContent        = t('modeBtnDwz');
     $('divider-guardrails').textContent = t('dividerGuard');
-    $('divider-dwz').textContent        = t('dividerDwz');
 
     // 圖表標題 / Chart titles
     $('chart-accum-title').textContent = t('chartAccum');
@@ -770,7 +753,6 @@
         if (c.iwr)     $('i-iwr').value      = c.iwr;
         if (c.upper)   $('i-upper').value    = c.upper;
         if (c.lower)   $('i-lower').value    = c.lower;
-        if (c.horizon) $('i-horizon').value  = c.horizon;
         if (c.death)   $('i-death').value    = c.death;
         if (c.mode)    setMode(c.mode, false);
       } catch(_) {}
@@ -813,7 +795,6 @@
     ['fixed','guardrails','dwz'].forEach(id => $('mode-'+id).classList.toggle('active', id===m));
     $('fixed-inputs').classList.toggle('hidden',      m!=='fixed');
     $('guardrails-inputs').classList.toggle('hidden', m!=='guardrails');
-    $('dwz-inputs').classList.toggle('hidden',        m!=='dwz');
     if (recalc) calc();
   }
   $('mode-fixed').onclick      = () => setMode('fixed');
@@ -832,11 +813,10 @@
     $('v-iwr').textContent     = $('i-iwr').value + '%';
     $('v-upper').textContent   = '+' + $('i-upper').value + '%';
     $('v-lower').textContent   = '-' + $('i-lower').value + '%';
-    $('v-horizon').textContent = $('i-horizon').value + ' ' + t('sliderYrs');
     $('v-death').textContent   = $('i-death').value;
   }
 
-  ['i-age','i-income','i-expenses','i-savings','i-return','i-swr','i-iwr','i-upper','i-lower','i-horizon','i-death']
+  ['i-age','i-income','i-expenses','i-savings','i-return','i-swr','i-iwr','i-upper','i-lower','i-death']
     .forEach(id => $(id).addEventListener('input', () => { syncSliderDisplays(); calc(); scheduleSave(); }));
 
   function scheduleSave() { clearTimeout(saveTimer); saveTimer = setTimeout(persist, 1200); }
@@ -856,7 +836,6 @@
       iwr:      Math.max(0.01, +$('i-iwr').value      || 5) / 100,
       upper:    Math.max(1,    +$('i-upper').value    || 20),
       lower:    Math.max(1,    +$('i-lower').value    || 20),
-      horizon:  Math.max(5,    +$('i-horizon').value  || 30),
       deathAge: Math.max(50,   +$('i-death').value    || 85),
       mode: MODE,
     };
@@ -899,8 +878,9 @@
       const sr=Math.max(0,inp.ret-0.03);
       const sp=result.alreadyFire?inp.savings:result.fireNumber;
       const sa=result.alreadyFire?inp.age:Math.round(result.fireAge||inp.age);
-      lastBaseRows  =simulateDecumulation(sp,inp.expenses,inp.ret,inp.iwr,inp.upper,inp.lower,inp.horizon,sa);
-      lastStressRows=simulateDecumulation(sp,inp.expenses,sr,     inp.iwr,inp.upper,inp.lower,inp.horizon,sa);
+      const horizon=Math.max(1, Math.round(inp.deathAge - sa));
+      lastBaseRows  =simulateDecumulation(sp,inp.expenses,inp.ret,inp.iwr,inp.upper,inp.lower,horizon,sa);
+      lastStressRows=simulateDecumulation(sp,inp.expenses,sr,     inp.iwr,inp.upper,inp.lower,horizon,sa);
       $('leg-base-label').textContent  =`${t('scenBase')} (${(inp.ret*100).toFixed(1)}%)`;
       $('leg-stress-label').textContent=`${t('scenStress')} (${(Math.max(0,inp.ret-0.03)*100).toFixed(1)}%)`;
       drawDecuChart(lastBaseRows,lastStressRows,sp);
@@ -1077,11 +1057,11 @@
   // ────────────────────────────────────────────────
   function ghFetch(p,path,o={}){return fetch(API+path,{...o,headers:{'Authorization':`token ${p}`,'Content-Type':'application/json',...(o.headers||{})}});}
   async function findGist(p){for(let pg=1;;pg++){const r=await ghFetch(p,`/gists?per_page=100&page=${pg}`);if(!r.ok)return null;const l=await r.json();const h=l.find(g=>g.files[GF]);if(h){const f=await ghFetch(p,`/gists/${h.id}`);return f.ok?f.json():null;}if(l.length<100)return null;}}
-  function applyGist(g){try{const c=JSON.parse(g.files[GF].content);if(c.age)$('i-age').value=c.age;if(c.income)$('i-income').value=c.income;if(c.expenses)$('i-expenses').value=c.expenses;if(c.savings)$('i-savings').value=c.savings;if(c.ret)$('i-return').value=c.ret;if(c.swr)$('i-swr').value=c.swr;if(c.iwr)$('i-iwr').value=c.iwr;if(c.upper)$('i-upper').value=c.upper;if(c.lower)$('i-lower').value=c.lower;if(c.horizon)$('i-horizon').value=c.horizon;if(c.death)$('i-death').value=c.death;if(c.mode)setMode(c.mode,false);}catch(_){}}
+  function applyGist(g){try{const c=JSON.parse(g.files[GF].content);if(c.age)$('i-age').value=c.age;if(c.income)$('i-income').value=c.income;if(c.expenses)$('i-expenses').value=c.expenses;if(c.savings)$('i-savings').value=c.savings;if(c.ret)$('i-return').value=c.ret;if(c.swr)$('i-swr').value=c.swr;if(c.iwr)$('i-iwr').value=c.iwr;if(c.upper)$('i-upper').value=c.upper;if(c.lower)$('i-lower').value=c.lower;if(c.death)$('i-death').value=c.death;if(c.mode)setMode(c.mode,false);}catch(_){}}
   async function pushGist(cfg){if(!S.pat)return;setBadge(t('syncing'));const body={description:'FIRE Calculator — settings',public:false,files:{[GF]:{content:JSON.stringify(cfg,null,2)}}};const url=S.gistId?`/gists/${S.gistId}`:'/gists';const method=S.gistId?'PATCH':'POST';const r=await ghFetch(S.pat,url,{method,body:JSON.stringify(body)});if(r.ok){const g=await r.json();S.gistId=g.id;ls('fire_gist_id',g.id);setBadge(t('synced'),'ok');}else setBadge(t('syncFailed'),'bad');}
   async function pullGist(){try{setBadge(t('syncing'));const r=await ghFetch(S.pat,`/gists/${S.gistId}`);if(!r.ok){setBadge('');return;}applyGist(await r.json());syncSliderDisplays();calc();setBadge(t('synced'),'ok');}catch(_){setBadge('');}}
 
-  function persist(){const i=getInputs();const c={age:i.age,income:i.income,expenses:i.expenses,savings:i.savings,ret:$('i-return').value,swr:$('i-swr').value,iwr:$('i-iwr').value,upper:$('i-upper').value,lower:$('i-lower').value,horizon:$('i-horizon').value,death:$('i-death').value,mode:MODE};ls('fire_cfg',JSON.stringify(c));if(S.pat)pushGist(c);}
+  function persist(){const i=getInputs();const c={age:i.age,income:i.income,expenses:i.expenses,savings:i.savings,ret:$('i-return').value,swr:$('i-swr').value,iwr:$('i-iwr').value,upper:$('i-upper').value,lower:$('i-lower').value,death:$('i-death').value,mode:MODE};ls('fire_cfg',JSON.stringify(c));if(S.pat)pushGist(c);}
   function ls(k,v){if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v);}
   function setBadge(txt,cls=''){const e=$('sync-badge');e.textContent=txt;e.className='sync-badge'+(cls?' '+cls:'');}
   function fmtMoney(n){if(!isFinite(n)||isNaN(n))return'—';if(n>=1e6)return'$'+(n/1e6).toFixed(2).replace(/\.?0+$/,'')+'M';if(n>=1e3)return'$'+Math.round(n/1e3)+'K';return'$'+Math.round(n).toLocaleString();}
