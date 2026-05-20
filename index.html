@@ -405,7 +405,7 @@
       thYear:          'Year',
       thAge:           'Age',
       thPortfolio:     'Portfolio',
-      thRate:          'Rate',
+      thRate:          'Rate (pre-adj)',
       thWithdraw:      'Withdraw',
       thAction:        'Action',
       chartEmpty:      'Enter your numbers to see the projection',
@@ -463,7 +463,7 @@
       thYear:          '年份',
       thAge:           '年齡',
       thPortfolio:     '投資組合',
-      thRate:          '提領率',
+      thRate:          '提領率（調整前）',
       thWithdraw:      '提領金額',
       thAction:        '調整動作',
       chartEmpty:      '請輸入數字以查看預測',
@@ -859,7 +859,7 @@
     let xl='';const step=maxT<=20?5:maxT<=40?10:15;for(let yr=0;yr<=maxT;yr+=step)xl+=`<text x="${xS(yr)}" y="${DPT+DIH+18}" text-anchor="middle" fill="#888" font-size="10">${t('chartYrPfx')} ${yr}</text>`;
     const bl=br.map(r=>`${xS(r.year)},${yS(r.portfolioEnd??r.portfolioStart)}`).join(' ');
     const sl=sr.map(r=>`${xS(r.year)},${yS(r.portfolioEnd??r.portfolioStart)}`).join(' ');
-    let ed='';sr.forEach(r=>{if(r.event==='cut'||r.event==='raise'){const col=r.event==='cut'?'#c07070':'#70a870';ed+=`<circle cx="${xS(r.year)}" cy="${yS(r.portfolioEnd)}" r="4" fill="${col}" opacity="0.85"/>"`;}});
+    let ed='';sr.forEach(r=>{if(r.event==='cut'||r.event==='raise'){const col=r.event==='cut'?'#c07070':'#70a870';ed+=`<circle cx="${xS(r.year)}" cy="${yS(r.portfolioEnd)}" r="4" fill="${col}" opacity="0.85"/>`;}});
     $('decu-svg').innerHTML=`<clipPath id="dc"><rect x="${DPL}" y="${DPT}" width="${DIW}" height="${DIH}"/></clipPath>${gl}${yl}${xl}<g clip-path="url(#dc)"><polyline points="${bl}" fill="none" stroke="#e8e8e8" stroke-width="1.5" stroke-linejoin="round" opacity="0.5"/><polyline points="${sl}" fill="none" stroke="#c8a96e" stroke-width="1.5" stroke-linejoin="round"/>${ed}</g><line x1="${DPL}" y1="${DPT}" x2="${DPL}" y2="${DPT+DIH}" stroke="#2a2a2a" stroke-width="1"/><line x1="${DPL}" y1="${DPT+DIH}" x2="${DPL+DIW}" y2="${DPT+DIH}" stroke="#2a2a2a" stroke-width="1"/>`;
   }
 
