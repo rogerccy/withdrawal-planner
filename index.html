@@ -154,7 +154,7 @@
 </div>
 
 <div id="s-auth" class="center-screen">
-  <div class="logo">FIRE</div>
+  <div class="logo">Withdrawal Planner</div>
   <p class="subtitle" id="auth-subtitle"></p>
   <div class="form-group">
     <label class="form-label" for="pat" id="pat-label"></label>
@@ -208,8 +208,18 @@
             <button class="tip-btn" data-tip="ret">?</button>
           </div>
           <div class="slider-row">
-            <input type="range" id="i-return" min="1" max="12" step="0.5" value="7">
-            <span class="slider-val" id="v-return">7%</span>
+            <input type="range" id="i-return" min="1" max="15" step="0.5" value="10">
+            <span class="slider-val" id="v-return">10%</span>
+          </div>
+        </div>
+        <div class="input-row">
+          <div class="label-row">
+            <label class="form-label" id="label-inflation"></label>
+            <button class="tip-btn" data-tip="inflation">?</button>
+          </div>
+          <div class="slider-row">
+            <input type="range" id="i-inflation" min="0" max="10" step="0.25" value="3">
+            <span class="slider-val" id="v-inflation">3%</span>
           </div>
         </div>
         <div class="input-row">
@@ -331,7 +341,8 @@
       modeGuardrails:     'Guardrails',
       labelAge:           'Current Age',
       labelPortfolio:     'Portfolio / Investments',
-      labelReturn:        'Expected Annual Return',
+      labelReturn:        'Expected Annual Return (Nominal)',
+      labelInflation:     'Inflation Rate',
       labelDeath:         'Expected Death Age',
       labelRemain:        'Target Remaining at Death',
       labelIwr:           'Initial Withdrawal Rate',
@@ -348,7 +359,8 @@
       thAge:              'Age',
       thPortfolio:        'Portfolio',
       thRate:             'Rate (pre-adj)',
-      thWithdraw:         'Withdraw',
+      thWithdraw:         'Withdraw (Real)',
+      thNominalWithdraw:  'Nominal Withdraw',
       thAction:           'Action',
       thPortEnd:          'End Balance',
       chartAdjust:        'Enter your portfolio to see the projection',
@@ -392,7 +404,8 @@
       modeGuardrails:     '護欄策略',
       labelAge:           '目前年齡',
       labelPortfolio:     '投資組合',
-      labelReturn:        '預期年化報酬率',
+      labelReturn:        '預期年化報酬率（名目）',
+      labelInflation:     '通膨率',
       labelDeath:         '預期死亡年齡',
       labelRemain:        '預期留存金額',
       labelIwr:           '初始提領率',
@@ -409,7 +422,8 @@
       thAge:              '年齡',
       thPortfolio:        '投資組合',
       thRate:             '提領率（調整前）',
-      thWithdraw:         '提領金額',
+      thWithdraw:         '提領金額（今日幣值）',
+      thNominalWithdraw:  '名目提領金額',
       thAction:           '調整動作',
       thPortEnd:          '期末資產',
       chartAdjust:        '請輸入投資組合以查看預測',
@@ -447,8 +461,12 @@
       zh: { title: '投資組合', body: '你的可投資資產總額，包括券商帳戶、退休帳戶等。這是提領模擬的起始餘額。' }
     },
     ret: {
-      en: { title: 'Expected Annual Return (Real)', body: '"Real" means after subtracting inflation (~3%). The stock market returns ~10% nominally, so ~7% in real terms. Using real returns keeps everything in today\'s dollars.' },
-      zh: { title: '預期年化報酬率（實質）', body: '「實質」是指扣除通膨（約3%）後的報酬。股市名目報酬約10%，實質約7%。使用實質報酬率可讓所有數字維持在今日幣值。' }
+      en: { title: 'Expected Annual Return (Nominal)', body: 'Enter the raw return before inflation — e.g. ~10% for a broad stock index. The calculator subtracts your inflation rate to get the real return used in the simulation. Withdrawal amounts in the table are in today\'s dollars; the "Nominal Withdraw" column shows what you\'ll actually transfer each year.' },
+      zh: { title: '預期年化報酬率（名目）', body: '輸入扣除通膨前的名目報酬率，例如大盤指數約 10%。計算器自動減去通膨率，得到模擬用的實質報酬率。表格中提領金額為今日幣值；「名目提領金額」欄顯示每年實際需要提領的金額。' }
+    },
+    inflation: {
+      en: { title: 'Inflation Rate', body: 'The annual rate at which prices rise. Subtracted from the nominal return to get the real return used in the simulation. Also used to convert real withdrawal amounts to the nominal amounts you\'ll actually need each year. Typical long-term inflation is 2–3%.' },
+      zh: { title: '通膨率', body: '每年物價上漲的比率。從名目報酬率中減去，得到模擬使用的實質報酬率；同時用於將今日幣值的提領金額換算成每年實際需提領的名目金額。長期通膨通常為 2–3%。' }
     },
     death: {
       en: { title: 'Expected Death Age', body: 'The age at which your portfolio should reach the target remaining balance. Match this with your Life Clock app setting for consistency.' },
@@ -492,6 +510,7 @@
     $('label-age').textContent       = t('labelAge');
     $('label-portfolio').textContent = t('labelPortfolio');
     $('label-return').textContent    = t('labelReturn');
+    $('label-inflation').textContent = t('labelInflation');
     $('label-death').textContent     = t('labelDeath');
     $('label-remain').textContent    = t('labelRemain');
     $('label-iwr').textContent       = t('labelIwr');
@@ -552,8 +571,9 @@
         const c = JSON.parse(saved);
         if (c.age)    $('i-age').value     = c.age;
         if (c.savings)$('i-savings').value = c.savings;
-        if (c.ret)    $('i-return').value  = c.ret;
-        if (c.iwr)    $('i-iwr').value     = c.iwr;
+        if (c.ret)                $('i-return').value    = c.ret;
+        if (c.inflation !== undefined) $('i-inflation').value = c.inflation;
+        if (c.iwr)                $('i-iwr').value       = c.iwr;
         if (c.upper)  $('i-upper').value   = c.upper;
         if (c.lower)  $('i-lower').value   = c.lower;
         if (c.death)  $('i-death').value   = c.death;
@@ -604,38 +624,42 @@
   $('scen-stress').onclick = () => {
     tableScen = 'stress';
     $('scen-stress').classList.add('active'); $('scen-base').classList.remove('active');
-    renderTable(lastStressRows); updateScenDesc(getInputs());
+    const inp = getInputs(); renderTable(lastStressRows, inp.inflation); updateScenDesc(inp);
   };
   $('scen-base').onclick = () => {
     tableScen = 'base';
     $('scen-base').classList.add('active'); $('scen-stress').classList.remove('active');
-    renderTable(lastBaseRows); updateScenDesc(getInputs());
+    const inp = getInputs(); renderTable(lastBaseRows, inp.inflation); updateScenDesc(inp);
   };
 
   function syncSliderDisplays() {
-    $('v-return').textContent = $('i-return').value + '%';
-    $('v-iwr').textContent    = $('i-iwr').value + '%';
-    $('v-upper').textContent  = '+' + $('i-upper').value + '%';
-    $('v-lower').textContent  = '-' + $('i-lower').value + '%';
-    $('v-death').textContent  = $('i-death').value;
+    $('v-return').textContent    = $('i-return').value + '%';
+    $('v-inflation').textContent = $('i-inflation').value + '%';
+    $('v-iwr').textContent       = $('i-iwr').value + '%';
+    $('v-upper').textContent     = '+' + $('i-upper').value + '%';
+    $('v-lower').textContent     = '-' + $('i-lower').value + '%';
+    $('v-death').textContent     = $('i-death').value;
   }
 
-  ['i-age','i-savings','i-return','i-iwr','i-upper','i-lower','i-death','i-remain']
+  ['i-age','i-savings','i-return','i-inflation','i-iwr','i-upper','i-lower','i-death','i-remain']
     .forEach(id => $(id).addEventListener('input', () => { syncSliderDisplays(); calc(); scheduleSave(); }));
 
   function scheduleSave() { clearTimeout(saveTimer); saveTimer = setTimeout(persist, 1200); }
   $('sync-btn').onclick = () => { if (S.pat && S.gistId) pullGist(); };
 
   function getInputs() {
+    const nominal   = Math.max(0, +$('i-return').value    || 10);
+    const inflation = Math.max(0, +$('i-inflation').value || 3);
     return {
-      age:      Math.max(0,    +$('i-age').value      || 50),
-      savings:  Math.max(0,    +$('i-savings').value  || 0),
-      ret:      Math.max(0,    +$('i-return').value   || 7) / 100,
-      iwr:      Math.max(0.01, +$('i-iwr').value      || 5) / 100,
-      upper:    Math.max(1,    +$('i-upper').value    || 20),
-      lower:    Math.max(1,    +$('i-lower').value    || 20),
-      deathAge: Math.max(50,   +$('i-death').value    || 85),
-      remain:   Math.max(0,    +$('i-remain').value   || 0),
+      age:       Math.max(0,    +$('i-age').value      || 50),
+      savings:   Math.max(0,    +$('i-savings').value  || 0),
+      ret:       Math.max(0,    nominal - inflation)   / 100,
+      inflation: inflation / 100,
+      iwr:       Math.max(0.01, +$('i-iwr').value      || 5) / 100,
+      upper:     Math.max(1,    +$('i-upper').value    || 20),
+      lower:     Math.max(1,    +$('i-lower').value    || 20),
+      deathAge:  Math.max(50,   +$('i-death').value    || 85),
+      remain:    Math.max(0,    +$('i-remain').value   || 0),
     };
   }
 
@@ -713,7 +737,7 @@
     renderFixedSummary(inp, lastBaseRows);
     drawDecuChart(lastBaseRows, null, inp.savings);
     updateTableHeaders();
-    renderFixedTable(lastBaseRows);
+    renderFixedTable(lastBaseRows, inp.inflation);
     updateScenDesc(inp);
 
     $('leg-base-label').textContent = `${(inp.ret*100).toFixed(1)}%`;
@@ -734,7 +758,7 @@
     renderGuardrailsSummary(inp, lastBaseRows, lastStressRows);
     drawDecuChart(lastBaseRows, lastStressRows, inp.savings);
     updateTableHeaders();
-    renderTable(tableScen === 'base' ? lastBaseRows : lastStressRows);
+    renderTable(tableScen === 'base' ? lastBaseRows : lastStressRows, inp.inflation);
     updateScenDesc(inp);
 
     $('chart-legend').classList.remove('single');
@@ -768,13 +792,15 @@
     el.innerHTML = `<div class="metric-row"><span class="metric-label">${t('gFinalPort')}</span><span class="metric-val">${val}</span></div>`;
   }
 
-  function renderFixedTable(rows) {
+  function renderFixedTable(rows, inflation) {
     $('table-body').innerHTML = rows.filter(r => r.year > 0).map(r => {
       const dep = r.portfolioEnd <= 0;
+      const nominal = fmtMoney(r.withdraw * Math.pow(1 + inflation, r.year));
       return `<tr class="${dep?'depleted-row':''}">
         <td>${r.year}</td><td>${r.age}</td>
         <td>${fmtMoney(r.portfolioStart)}</td>
         <td>${fmtMoney(r.withdraw)}</td>
+        <td>${nominal}</td>
         <td>${dep ? `<span style="color:#c07070">${t('gDepleted')}</span>` : fmtMoney(r.portfolioEnd)}</td>
       </tr>`;
     }).join('');
@@ -814,21 +840,22 @@
     </div>`;
   }
 
-  function renderTable(rows) {
+  function renderTable(rows, inflation) {
     $('table-body').innerHTML = rows.filter(r => r.year>0).map(r => {
       const dep = r.portfolioEnd<=0;
       const rc  = dep?'depleted-row':r.event==='cut'?'row-cut':r.event==='raise'?'row-raise':'';
       const act = r.event==='cut'   ? `<span class="event-cut">${t('eventCut')}</span>`
                 : r.event==='raise' ? `<span class="event-raise">${t('eventRaise')}</span>`
                 :                    `<span class="event-normal">—</span>`;
-      return `<tr class="${rc}"><td>${r.year}</td><td>${r.age}</td><td>${fmtMoney(r.portfolioStart)}</td><td>${r.currentRate.toFixed(1)}%</td><td>${fmtMoney(r.withdraw)}</td><td>${dep?`<span style="color:#c07070">${t('gDepleted')}</span>`:act}</td></tr>`;
+      const nominal = fmtMoney(r.withdraw * Math.pow(1 + inflation, r.year));
+      return `<tr class="${rc}"><td>${r.year}</td><td>${r.age}</td><td>${fmtMoney(r.portfolioStart)}</td><td>${r.currentRate.toFixed(1)}%</td><td>${fmtMoney(r.withdraw)}</td><td>${nominal}</td><td>${dep?`<span style="color:#c07070">${t('gDepleted')}</span>`:act}</td></tr>`;
     }).join('');
   }
 
   function updateTableHeaders() {
     const keys = MODE === 'fixed'
-      ? ['thYear','thAge','thPortfolio','thWithdraw','thPortEnd']
-      : ['thYear','thAge','thPortfolio','thRate','thWithdraw','thAction'];
+      ? ['thYear','thAge','thPortfolio','thWithdraw','thNominalWithdraw','thPortEnd']
+      : ['thYear','thAge','thPortfolio','thRate','thWithdraw','thNominalWithdraw','thAction'];
     $('table-head-row').innerHTML = keys.map(k => `<th>${t(k)}</th>`).join('');
   }
 
@@ -911,11 +938,11 @@
   // ── Gist / Persist ────────────────────────────────
   function ghFetch(p,path,o={}){return fetch(API+path,{...o,headers:{'Authorization':`token ${p}`,'Content-Type':'application/json',...(o.headers||{})}});}
   async function findGist(p){for(let pg=1;;pg++){const r=await ghFetch(p,`/gists?per_page=100&page=${pg}`);if(!r.ok)return null;const l=await r.json();const h=l.find(g=>g.files[GF]);if(h){const f=await ghFetch(p,`/gists/${h.id}`);return f.ok?f.json():null;}if(l.length<100)return null;}}
-  function applyGist(g){try{const c=JSON.parse(g.files[GF].content);if(c.age)$('i-age').value=c.age;if(c.savings)$('i-savings').value=c.savings;if(c.ret)$('i-return').value=c.ret;if(c.iwr)$('i-iwr').value=c.iwr;if(c.upper)$('i-upper').value=c.upper;if(c.lower)$('i-lower').value=c.lower;if(c.death)$('i-death').value=c.death;if(c.remain!==undefined)$('i-remain').value=c.remain;if(c.mode)applyMode(c.mode,false);}catch(_){}}
+  function applyGist(g){try{const c=JSON.parse(g.files[GF].content);if(c.age)$('i-age').value=c.age;if(c.savings)$('i-savings').value=c.savings;if(c.ret)$('i-return').value=c.ret;if(c.inflation!==undefined)$('i-inflation').value=c.inflation;if(c.iwr)$('i-iwr').value=c.iwr;if(c.upper)$('i-upper').value=c.upper;if(c.lower)$('i-lower').value=c.lower;if(c.death)$('i-death').value=c.death;if(c.remain!==undefined)$('i-remain').value=c.remain;if(c.mode)applyMode(c.mode,false);}catch(_){}}
   async function pushGist(cfg){if(!S.pat)return;setBadge(t('syncing'));const body={description:'Withdrawal Planner — settings',public:false,files:{[GF]:{content:JSON.stringify(cfg,null,2)}}};const url=S.gistId?`/gists/${S.gistId}`:'/gists';const method=S.gistId?'PATCH':'POST';const r=await ghFetch(S.pat,url,{method,body:JSON.stringify(body)});if(r.ok){const g=await r.json();S.gistId=g.id;ls('fire_gist_id',g.id);setBadge(t('synced'),'ok');}else setBadge(t('syncFailed'),'bad');}
   async function pullGist(){try{setBadge(t('syncing'));const r=await ghFetch(S.pat,`/gists/${S.gistId}`);if(!r.ok){setBadge('');return;}applyGist(await r.json());syncSliderDisplays();calc();setBadge(t('synced'),'ok');}catch(_){setBadge('');}}
 
-  function persist(){const i=getInputs();const c={age:i.age,savings:i.savings,ret:$('i-return').value,iwr:$('i-iwr').value,upper:$('i-upper').value,lower:$('i-lower').value,death:$('i-death').value,remain:i.remain,mode:MODE};ls('fire_cfg',JSON.stringify(c));if(S.pat)pushGist(c);}
+  function persist(){const i=getInputs();const c={age:i.age,savings:i.savings,ret:$('i-return').value,inflation:$('i-inflation').value,iwr:$('i-iwr').value,upper:$('i-upper').value,lower:$('i-lower').value,death:$('i-death').value,remain:i.remain,mode:MODE};ls('fire_cfg',JSON.stringify(c));if(S.pat)pushGist(c);}
   function ls(k,v){if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v);}
   function setBadge(txt,cls=''){const e=$('sync-badge');e.textContent=txt;e.className='sync-badge'+(cls?' '+cls:'');}
   function fmtMoney(n){if(!isFinite(n)||isNaN(n))return'—';if(n>=1e6)return'$'+(n/1e6).toFixed(2).replace(/\.?0+$/,'')+'M';if(n>=1e4)return'$'+Math.round(n/1e3)+'K';if(n>=1e3)return'$'+(n/1e3).toFixed(1).replace(/\.0$/,'')+'K';return'$'+Math.round(n).toLocaleString();}
