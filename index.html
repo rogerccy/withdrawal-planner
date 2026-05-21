@@ -139,6 +139,9 @@
     .event-raise { color: #70a870; }
     .event-normal { color: var(--muted2); }
     .depleted-row td { color: var(--red) !important; font-style: italic; }
+
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: flex; align-items: center; justify-content: center; z-index: 400; padding: 24px; }
+    .modal-card { background: var(--surface); border: 1px solid var(--border2); border-radius: 6px; padding: 32px 28px; width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 16px; }
   </style>
 </head>
 <body>
@@ -153,17 +156,19 @@
   <div class="tip-body"  id="tip-body"></div>
 </div>
 
-<div id="s-auth" class="center-screen">
-  <div class="logo">Withdrawal Planner</div>
-  <p class="subtitle" id="auth-subtitle"></p>
-  <div class="form-group">
-    <label class="form-label" for="pat" id="pat-label"></label>
-    <input type="password" id="pat" placeholder="ghp_…" autocomplete="off" spellcheck="false">
+<div id="s-auth" class="modal-overlay hidden">
+  <div class="modal-card">
+    <p class="subtitle" id="auth-subtitle"></p>
+    <div class="form-group">
+      <label class="form-label" for="pat" id="pat-label"></label>
+      <input type="password" id="pat" placeholder="ghp_…" autocomplete="off" spellcheck="false">
+    </div>
+    <p class="subtitle" id="auth-scope-note"></p>
+    <button class="btn"       id="connect-btn"></button>
+    <div class="err-msg"      id="auth-err"></div>
+    <button class="btn-ghost" id="disconnect-btn" style="display:none"></button>
+    <button class="btn-ghost" id="skip-btn"></button>
   </div>
-  <p class="subtitle" id="auth-scope-note"></p>
-  <button class="btn"       id="connect-btn"></button>
-  <div class="err-msg"      id="auth-err"></div>
-  <button class="btn-ghost" id="skip-btn"></button>
 </div>
 
 <div id="s-main" class="hidden">
@@ -175,6 +180,7 @@
       <div class="top-right">
         <span class="sync-badge" id="sync-badge"></span>
         <button class="icon-btn" id="sync-btn" title="Sync now">↻</button>
+        <button class="icon-btn" id="gist-btn"></button>
       </div>
     </div>
 
@@ -326,11 +332,13 @@
 
   const LANG = {
     en: {
-      authSubtitle:       'Withdrawal Planner.\nConnect GitHub to save your inputs.',
+      authSubtitle:       'Connect GitHub to sync settings across devices.',
       patLabel:           'GitHub Personal Access Token',
       authScopeNote:      'Needs <strong style="color:#777">gist</strong> scope — <a href="https://github.com/settings/tokens/new?scopes=gist&description=withdrawal-planner" target="_blank" rel="noopener">create classic token →</a>',
       connectBtn:         'Connect',
-      skipBtn:            'Skip — local only',
+      skipBtn:            'Cancel',
+      disconnectBtn:      'Disconnect',
+      gistBtn:            'Gist Sync',
       connectingBtn:      'Connecting…',
       invalidToken:       'Invalid token — check scopes and try again.',
       homeLink:           '← Home',
@@ -389,11 +397,13 @@
       syncFailed:         'sync failed',
     },
     zh: {
-      authSubtitle:       '提領規劃器。\n連結 GitHub 以儲存你的輸入資料。',
+      authSubtitle:       '連結 GitHub 以跨裝置同步設定。',
       patLabel:           'GitHub 個人存取權杖',
       authScopeNote:      '僅需 <strong style="color:#777">gist</strong> 權限 — <a href="https://github.com/settings/tokens/new?scopes=gist&description=withdrawal-planner" target="_blank" rel="noopener">建立 classic token →</a>',
       connectBtn:         '連結',
-      skipBtn:            '略過——僅本地儲存',
+      skipBtn:            '取消',
+      disconnectBtn:      '中斷連線',
+      gistBtn:            'Gist 同步',
       connectingBtn:      '連結中…',
       invalidToken:       '權杖無效——請確認權限後重試。',
       homeLink:           '← 首頁',
@@ -495,11 +505,13 @@
     $('lang-en').classList.toggle('active', S.lang === 'en');
     $('lang-zh').classList.toggle('active', S.lang === 'zh');
 
-    $('auth-subtitle').innerHTML    = t('authSubtitle').replace('\n','<br>');
+    $('auth-subtitle').textContent   = t('authSubtitle');
     $('pat-label').textContent      = t('patLabel');
     $('auth-scope-note').innerHTML  = t('authScopeNote');
     $('connect-btn').textContent    = t('connectBtn');
+    $('disconnect-btn').textContent = t('disconnectBtn');
     $('skip-btn').textContent       = t('skipBtn');
+    $('gist-btn').textContent       = t('gistBtn');
     $('home-link-text').textContent = t('homeLink');
     $('top-logo-text').textContent  = t('topLogo');
 
@@ -554,14 +566,13 @@
   });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeTip(); });
 
-  const S = { pat: null, gistId: null, local: false, lang: 'en' };
+  const S = { pat: null, gistId: null, lang: 'en' };
   let saveTimer = null, tableScen = 'stress', MODE = 'fixed';
   let lastBaseRows = [], lastStressRows = [];
 
   function boot() {
     S.pat    = ls('fire_pat');
     S.gistId = ls('fire_gist_id');
-    S.local  = ls('fire_local') === '1';
     S.lang   = ls('fire_lang') || 'en';
     MODE     = ls('fire_mode') || 'fixed';
 
@@ -583,13 +594,13 @@
 
     applyMode(MODE, false);
     applyLang();
-    if (S.pat || S.local) { show('main'); calc(); if (S.pat && S.gistId) pullGist(); }
-    else show('auth');
+    show('main');
+    calc();
+    if (S.pat && S.gistId) pullGist();
   }
 
   function show(name) {
-    ['auth','main'].forEach(n => $('s-'+n).classList.add('hidden'));
-    $('s-'+name).classList.remove('hidden');
+    $('s-main').classList.toggle('hidden', name !== 'main');
   }
 
   function applyMode(m, doCalc=true) {
@@ -615,11 +626,24 @@
       S.pat = pat; ls('fire_pat', pat);
       const gist = await findGist(pat);
       if (gist) { S.gistId = gist.id; ls('fire_gist_id', gist.id); applyGist(gist); syncSliderDisplays(); }
-      show('main'); calc(); if (S.pat && S.gistId) pullGist();
+      $('s-auth').classList.add('hidden');
+      calc(); if (S.pat && S.gistId) pullGist();
     } catch(e) { $('auth-err').textContent = e.message; }
     finally { $('connect-btn').textContent = t('connectBtn'); $('connect-btn').disabled = false; }
   };
-  $('skip-btn').onclick = () => { S.local=true; ls('fire_local','1'); show('main'); calc(); };
+  $('skip-btn').onclick = () => { $('s-auth').classList.add('hidden'); };
+  $('gist-btn').onclick = () => {
+    $('disconnect-btn').style.display = S.pat ? '' : 'none';
+    $('pat').value = '';
+    $('auth-err').textContent = '';
+    $('s-auth').classList.remove('hidden');
+  };
+  $('disconnect-btn').onclick = () => {
+    S.pat = null; S.gistId = null;
+    ls('fire_pat', null); ls('fire_gist_id', null);
+    setBadge('');
+    $('s-auth').classList.add('hidden');
+  };
 
   $('scen-stress').onclick = () => {
     tableScen = 'stress';
