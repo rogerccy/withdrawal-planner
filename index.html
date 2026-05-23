@@ -227,6 +227,21 @@
             <input type="range" id="i-return" min="1" max="15" step="0.5" value="10">
             <span class="slider-val" id="v-return">10%</span>
           </div>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px">
+            <button class="preset-btn" data-ret="5" data-sigma="8" onclick="setReturnPreset(5,8)" id="preset-conservative"></button>
+            <button class="preset-btn" data-ret="9" data-sigma="15" onclick="setReturnPreset(9,15)">VT &nbsp;9%</button>
+            <button class="preset-btn" data-ret="14" data-sigma="18" onclick="setReturnPreset(14,18)">0050 &nbsp;14%</button>
+          </div>
+        </div>
+        <div class="input-row">
+          <div class="label-row">
+            <label class="form-label" id="label-sigma"></label>
+            <button class="tip-btn" data-tip="sigma">?</button>
+          </div>
+          <div class="slider-row">
+            <input type="range" id="i-sigma" min="3" max="35" step="0.5" value="15">
+            <span class="slider-val" id="v-sigma">15%</span>
+          </div>
         </div>
         <div class="input-row">
           <div class="label-row">
@@ -300,6 +315,12 @@
       <div class="panel">
         <div class="panel-title" id="panel-results-title"></div>
         <div id="results-content"></div>
+        <div id="success-rate-wrap" class="hidden" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span class="form-label" id="label-success-rate"></span>
+            <span id="success-rate-val" style="font-size:1.8rem;font-weight:200;line-height:1;font-variant-numeric:tabular-nums"></span>
+          </div>
+        </div>
       </div>
 
     </div>
@@ -307,67 +328,15 @@
     <div class="chart-wrap hidden" id="decu-chart-wrap">
       <div class="chart-header">
         <div class="chart-title" id="chart-decu-title"></div>
-        <div class="chart-legend" id="chart-legend">
-          <span class="leg-item"><span class="leg-line base"></span> <span id="leg-base-label"></span></span>
-          <span class="leg-item"><span class="leg-line stress"></span> <span id="leg-stress-label"></span></span>
+        <div class="mc-legend" id="chart-legend">
+          <span class="mc-leg-item"><span class="mc-leg-swatch" style="background:var(--accent);opacity:0.22"></span> <span id="mc-leg-outer"></span></span>
+          <span class="mc-leg-item"><span class="mc-leg-swatch" style="background:var(--accent);opacity:0.45"></span> <span id="mc-leg-inner"></span></span>
+          <span class="mc-leg-item"><span class="mc-leg-line"></span> <span id="mc-leg-med"></span></span>
         </div>
       </div>
       <svg id="decu-svg" class="chart-svg" viewBox="0 0 800 200" xmlns="http://www.w3.org/2000/svg"></svg>
     </div>
 
-    <div class="table-wrap hidden" id="table-wrap">
-      <div class="table-header">
-        <div class="chart-title" id="chart-table-title"></div>
-        <div class="scen-toggle" id="scen-toggle-wrap">
-          <button class="scen-btn active" id="scen-stress"></button>
-          <button class="scen-btn"        id="scen-base"></button>
-        </div>
-      </div>
-      <p class="scen-desc" id="scen-desc"></p>
-      <div class="table-scroll">
-        <table class="w-table">
-          <thead><tr id="table-head-row"></tr></thead>
-          <tbody id="table-body"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Monte Carlo section -->
-    <div class="chart-wrap hidden" id="mc-wrap">
-      <div class="chart-header" style="align-items:flex-start">
-        <div>
-          <div class="chart-title" id="mc-title-el"></div>
-          <p id="mc-desc-text" style="font-size:0.68rem;color:var(--muted2);margin-top:4px;line-height:1.5"></p>
-        </div>
-        <div style="text-align:right;flex-shrink:0;margin-left:16px">
-          <div id="mc-success-val" style="font-size:1.8rem;font-weight:200;line-height:1;font-variant-numeric:tabular-nums"></div>
-          <div id="mc-success-lbl" style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted)"></div>
-        </div>
-      </div>
-      <div style="padding:0 6px 14px;border-bottom:1px solid var(--border);margin-bottom:16px">
-        <div class="label-row" style="margin-bottom:6px">
-          <label class="form-label" id="label-sigma"></label>
-          <button class="tip-btn" data-tip="sigma">?</button>
-        </div>
-        <div id="sigma-presets" style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">
-          <button class="preset-btn" data-val="8"  onclick="setSigma(8)"  id="preset-conservative"></button>
-          <button class="preset-btn" data-val="15" onclick="setSigma(15)">VT &nbsp;15%</button>
-          <button class="preset-btn" data-val="18" onclick="setSigma(18)">0050 &nbsp;18%</button>
-        </div>
-        <div class="slider-row">
-          <input type="range" id="i-sigma" min="3" max="35" step="0.5" value="15">
-          <span class="slider-val" id="v-sigma">15%</span>
-        </div>
-      </div>
-      <div class="mc-legend" style="padding:0 6px;margin-bottom:10px">
-        <span class="mc-leg-item"><span class="mc-leg-swatch" style="background:var(--accent);opacity:0.22"></span> <span id="mc-leg-outer"></span></span>
-        <span class="mc-leg-item"><span class="mc-leg-swatch" style="background:var(--accent);opacity:0.45"></span> <span id="mc-leg-inner"></span></span>
-        <span class="mc-leg-item"><span class="mc-leg-line"></span> <span id="mc-leg-med"></span></span>
-      </div>
-      <svg id="mc-port-svg" class="chart-svg" viewBox="0 0 800 200" xmlns="http://www.w3.org/2000/svg"></svg>
-      <div id="mc-wd-header" class="hidden" style="margin-top:18px;font-size:0.65rem;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);padding:0 6px;margin-bottom:10px"></div>
-      <svg id="mc-wd-svg" class="chart-svg hidden" viewBox="0 0 800 200" xmlns="http://www.w3.org/2000/svg"></svg>
-    </div>
 
   </div>
 </div>
@@ -455,6 +424,8 @@
       mcLegOuter:         '5th – 95th',
       mcLegInner:         '25th – 75th',
       mcLegMed:           'Median',
+      hoverWithdraw:      'Withdraw (Jan 1)',
+      hoverPortEnd:       'End Balance',
       syncing:            'syncing…',
       synced:             'synced ✓',
       syncFailed:         'sync failed',
@@ -536,6 +507,8 @@
       mcLegOuter:         '5th – 95th',
       mcLegInner:         '25th – 75th',
       mcLegMed:           '中位數',
+      hoverWithdraw:      '年初提領',
+      hoverPortEnd:       '期末資產',
       syncing:            '同步中…',
       synced:             '已同步 ✓',
       syncFailed:         '同步失敗',
@@ -614,17 +587,14 @@
     $('label-lower').textContent     = t('labelLower');
 
     $('chart-decu-title').textContent  = t('chartDecu');
-    $('chart-table-title').textContent = t('chartTable');
-    $('scen-stress').textContent = t('scenStress');
-    $('scen-base').textContent   = t('scenBase');
 
-    $('timing-note').textContent       = t('timingNote');
-    $('mc-title-el').textContent       = t('mcTitle');
-    $('label-sigma').textContent       = t('labelSigma');
+    $('timing-note').textContent         = t('timingNote');
+    $('label-sigma').textContent         = t('labelSigma');
     $('preset-conservative').textContent = t('presetConservative');
-    $('mc-leg-outer').textContent      = t('mcLegOuter');
-    $('mc-leg-inner').textContent      = t('mcLegInner');
-    $('mc-leg-med').textContent        = t('mcLegMed');
+    $('mc-leg-outer').textContent        = t('mcLegOuter');
+    $('mc-leg-inner').textContent        = t('mcLegInner');
+    $('mc-leg-med').textContent          = t('mcLegMed');
+    $('label-success-rate').textContent  = t('mcSuccessRate');
 
     syncSliderDisplays();
     if (!$('s-main').classList.contains('hidden')) calc();
@@ -659,7 +629,7 @@
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeTip(); });
 
   const S = { pat: null, gistId: null, lang: 'en' };
-  let saveTimer = null, tableScen = 'stress', MODE = 'fixed';
+  let saveTimer = null, MODE = 'fixed';
   let lastBaseRows = [], lastStressRows = [];
 
   function boot() {
@@ -704,7 +674,6 @@
     $('mode-vpw').classList.toggle('active', m === 'vpw');
     $('fixed-inputs').classList.toggle('hidden', m !== 'fixed');
     $('guardrails-inputs').classList.toggle('hidden', m !== 'guardrails');
-    $('scen-toggle-wrap').classList.toggle('hidden', m === 'fixed');
     ls('fire_mode', m);
     if (doCalc) calc();
   }
@@ -740,23 +709,6 @@
     $('s-auth').classList.add('hidden');
   };
 
-  $('scen-stress').onclick = () => {
-    tableScen = 'stress';
-    $('scen-stress').classList.add('active'); $('scen-base').classList.remove('active');
-    const inp = getInputs();
-    if (MODE === 'vpw') renderVpwTable(lastStressRows, inp.inflation);
-    else renderTable(lastStressRows, inp.inflation);
-    updateScenDesc(inp);
-  };
-  $('scen-base').onclick = () => {
-    tableScen = 'base';
-    $('scen-base').classList.add('active'); $('scen-stress').classList.remove('active');
-    const inp = getInputs();
-    if (MODE === 'vpw') renderVpwTable(lastBaseRows, inp.inflation);
-    else renderTable(lastBaseRows, inp.inflation);
-    updateScenDesc(inp);
-  };
-
   function syncSliderDisplays() {
     $('v-return').textContent    = $('i-return').value + '%';
     $('v-inflation').textContent = $('i-inflation').value + '%';
@@ -765,18 +717,20 @@
     $('v-lower').textContent     = '-' + $('i-lower').value + '%';
     $('v-death').textContent     = $('i-death').value;
     $('v-sigma').textContent     = $('i-sigma').value + '%';
-    updateSigmaPresets();
+    updateReturnPresets();
   }
 
-  function updateSigmaPresets() {
-    const val = +$('i-sigma').value;
+  function updateReturnPresets() {
+    const retVal   = +$('i-return').value;
+    const sigmaVal = +$('i-sigma').value;
     document.querySelectorAll('.preset-btn').forEach(btn => {
-      btn.classList.toggle('active', +btn.dataset.val === val);
+      btn.classList.toggle('active', +btn.dataset.ret === retVal && +btn.dataset.sigma === sigmaVal);
     });
   }
 
-  function setSigma(val) {
-    $('i-sigma').value = val;
+  function setReturnPreset(ret, sigma) {
+    $('i-return').value = ret;
+    $('i-sigma').value  = sigma;
     syncSliderDisplays();
     calc();
     scheduleSave();
@@ -881,16 +835,6 @@
 
     renderVpwResults(inp, lastBaseRows, horizon);
     renderVpwSummary(inp, lastBaseRows, lastStressRows);
-    drawDecuChart(lastBaseRows, lastStressRows, inp.savings);
-    updateTableHeaders();
-    renderVpwTable(tableScen === 'base' ? lastBaseRows : lastStressRows, inp.inflation);
-    updateScenDesc(inp);
-
-    $('chart-legend').classList.remove('single');
-    $('leg-base-label').textContent   = `${t('scenBase')} (${(inp.ret*100).toFixed(1)}%)`;
-    $('leg-stress-label').textContent = `${t('scenStress')} (${(sr*100).toFixed(1)}%)`;
-    $('decu-chart-wrap').classList.remove('hidden');
-    $('table-wrap').classList.remove('hidden');
   }
 
   // ── Render: VPW ──────────────────────────────────
@@ -925,36 +869,23 @@
     </div>`;
   }
 
-  function renderVpwTable(rows, inflation) {
-    $('table-body').innerHTML = rows.filter(r => r.year > 0).map(r => {
-      const dep = r.portfolioEnd <= 0.01 && r.year < rows[rows.length-1].year;
-      const nominal = fmtMoney(r.withdraw * Math.pow(1 + inflation, r.year));
-      return `<tr class="${dep?'depleted-row':''}">
-        <td>${r.year}</td><td>${r.age}</td>
-        <td>${fmtMoney(r.portfolioStart)}</td>
-        <td>${r.vpwPct.toFixed(1)}%</td>
-        <td>${fmtMoney(r.withdraw)}</td>
-        <td>${nominal}</td>
-        <td>${dep ? `<span style="color:#c07070">${t('gDepleted')}</span>` : fmtMoney(r.portfolioEnd)}</td>
-      </tr>`;
-    }).join('');
-  }
-
   // ── Main dispatch ─────────────────────────────────
   function calc() {
     const inp = getInputs();
     if (inp.savings <= 0) {
       $('results-content').innerHTML = `<div class="banner warning">${t('bannerEmpty')}</div>`;
+      $('success-rate-wrap').classList.add('hidden');
       $('decu-chart-wrap').classList.remove('hidden');
       drawChartEmpty('decu-svg');
-      $('table-wrap').classList.add('hidden');
-      $('mc-wrap').classList.add('hidden');
       return;
     }
-    if (MODE === 'fixed') calcFixed(inp);
-    else if (MODE === 'guardrails') calcGuardrails(inp);
-    else calcVpw(inp);
-    renderMCResults(runMonteCarlo(inp), inp);
+    const ok = MODE === 'fixed' ? calcFixed(inp)
+             : MODE === 'guardrails' ? (calcGuardrails(inp), true)
+             : (calcVpw(inp), true);
+    if (!ok) return;
+    const mc = runMonteCarlo(inp);
+    drawUnifiedChart(mc, inp);
+    updateSuccessRate(mc.successRate);
   }
 
   function calcFixed(inp) {
@@ -963,26 +894,16 @@
 
     if (pmt <= 0) {
       $('results-content').innerHTML = `<div class="banner warning">${t('bannerNegativePmt')}</div>`;
+      $('success-rate-wrap').classList.add('hidden');
       $('decu-chart-wrap').classList.add('hidden');
-      $('table-wrap').classList.add('hidden');
-      $('mc-wrap').classList.add('hidden');
-      return;
+      return false;
     }
 
-    lastBaseRows   = simulateFixed(inp.savings, pmt, inp.ret, horizon, inp.age);
-    lastStressRows = [];
+    lastBaseRows = simulateFixed(inp.savings, pmt, inp.ret, horizon, inp.age);
 
     renderFixedResults(inp, pmt, horizon);
     renderFixedSummary(inp, lastBaseRows);
-    drawDecuChart(lastBaseRows, null, inp.savings);
-    updateTableHeaders();
-    renderFixedTable(lastBaseRows, inp.inflation);
-    updateScenDesc(inp);
-
-    $('leg-base-label').textContent = `${(inp.ret*100).toFixed(1)}%`;
-    $('chart-legend').classList.add('single');
-    $('decu-chart-wrap').classList.remove('hidden');
-    $('table-wrap').classList.remove('hidden');
+    return true;
   }
 
   function calcGuardrails(inp) {
@@ -995,16 +916,6 @@
 
     renderGuardrailsResults(inp, initialWithdraw, horizon);
     renderGuardrailsSummary(inp, lastBaseRows, lastStressRows);
-    drawDecuChart(lastBaseRows, lastStressRows, inp.savings);
-    updateTableHeaders();
-    renderTable(tableScen === 'base' ? lastBaseRows : lastStressRows, inp.inflation);
-    updateScenDesc(inp);
-
-    $('chart-legend').classList.remove('single');
-    $('leg-base-label').textContent   = `${t('scenBase')} (${(inp.ret*100).toFixed(1)}%)`;
-    $('leg-stress-label').textContent = `${t('scenStress')} (${(sr*100).toFixed(1)}%)`;
-    $('decu-chart-wrap').classList.remove('hidden');
-    $('table-wrap').classList.remove('hidden');
   }
 
   // ── Render: Fixed ─────────────────────────────────
@@ -1031,19 +942,6 @@
     el.innerHTML = `<div class="metric-row"><span class="metric-label">${t('gFinalPort')}</span><span class="metric-val">${val}</span></div>`;
   }
 
-  function renderFixedTable(rows, inflation) {
-    $('table-body').innerHTML = rows.filter(r => r.year > 0).map(r => {
-      const dep = r.portfolioEnd <= 0;
-      const nominal = fmtMoney(r.withdraw * Math.pow(1 + inflation, r.year));
-      return `<tr class="${dep?'depleted-row':''}">
-        <td>${r.year}</td><td>${r.age}</td>
-        <td>${fmtMoney(r.portfolioStart)}</td>
-        <td>${fmtMoney(r.withdraw)}</td>
-        <td>${nominal}</td>
-        <td>${dep ? `<span style="color:#c07070">${t('gDepleted')}</span>` : fmtMoney(r.portfolioEnd)}</td>
-      </tr>`;
-    }).join('');
-  }
 
   // ── Render: Guardrails ────────────────────────────
   function renderGuardrailsResults(inp, initialWithdraw, horizon) {
@@ -1079,34 +977,6 @@
     </div>`;
   }
 
-  function renderTable(rows, inflation) {
-    $('table-body').innerHTML = rows.filter(r => r.year>0).map(r => {
-      const dep = r.portfolioEnd<=0;
-      const rc  = dep?'depleted-row':r.event==='cut'?'row-cut':r.event==='raise'?'row-raise':'';
-      const act = r.event==='cut'   ? `<span class="event-cut">${t('eventCut')}</span>`
-                : r.event==='raise' ? `<span class="event-raise">${t('eventRaise')}</span>`
-                :                    `<span class="event-normal">—</span>`;
-      const nominal = fmtMoney(r.withdraw * Math.pow(1 + inflation, r.year));
-      return `<tr class="${rc}"><td>${r.year}</td><td>${r.age}</td><td>${fmtMoney(r.portfolioStart)}</td><td>${r.currentRate.toFixed(1)}%</td><td>${fmtMoney(r.withdraw)}</td><td>${nominal}</td><td>${dep?`<span style="color:#c07070">${t('gDepleted')}</span>`:act}</td></tr>`;
-    }).join('');
-  }
-
-  function updateTableHeaders() {
-    const keys = MODE === 'fixed'
-      ? ['thYear','thAge','thPortfolio','thWithdraw','thNominalWithdraw','thPortEnd']
-      : MODE === 'vpw'
-      ? ['thYear','thAge','thPortfolio','thVpwRate','thWithdraw','thNominalWithdraw','thPortEnd']
-      : ['thYear','thAge','thPortfolio','thRate','thWithdraw','thNominalWithdraw','thAction'];
-    $('table-head-row').innerHTML = keys.map(k => `<th>${t(k)}</th>`).join('');
-  }
-
-  function updateScenDesc(inp) {
-    if (MODE === 'fixed') { $('scen-desc').textContent = ''; return; }
-    const sr = Math.max(0, inp.ret - 0.03);
-    $('scen-desc').textContent = tableScen === 'base'
-      ? `${t('scenBaseDesc')} — ${(inp.ret*100).toFixed(1)}%`
-      : `${t('scenStressDesc')} — ${(sr*100).toFixed(1)}%`;
-  }
 
   function metric(label, val) {
     return `<div class="metric-row"><span class="metric-label">${label}</span><span class="metric-val">${val}</span></div>`;
@@ -1115,24 +985,50 @@
   // ── Chart ─────────────────────────────────────────
   const DCW=800,DCH=200,DPL=64,DPR=24,DPT=14,DPB=36,DIW=DCW-DPL-DPR,DIH=DCH-DPT-DPB;
 
-  function drawDecuChart(br, sr, sp) {
-    const av = [...br, ...(sr||[])].flatMap(r => [r.portfolioStart, r.portfolioEnd||0]);
-    const maxV = Math.max(sp*1.15, ...av, 1);
-    const maxT = sr ? Math.max(br[br.length-1].year, sr[sr.length-1].year) : br[br.length-1].year;
-    const xS = v => DPL+(v/maxT)*DIW, yS = v => DPT+DIH-(Math.max(0,v)/maxV)*DIH;
-    let gl='',yl='';
-    for (let i=0;i<=4;i++) { const v=maxV*i/4,y=yS(v); gl+=`<line x1="${DPL}" y1="${y}" x2="${DPL+DIW}" y2="${y}" stroke="#1a1a1a" stroke-width="1"/>`;yl+=`<text x="${DPL-8}" y="${y+4}" text-anchor="end" fill="#888" font-size="10">${fmtMoney(v)}</text>`; }
-    let xl=''; const step=maxT<=20?5:maxT<=40?10:15;
-    for (let yr=0;yr<=maxT;yr+=step) xl+=`<text x="${xS(yr)}" y="${DPT+DIH+18}" text-anchor="middle" fill="#888" font-size="10">${t('chartYrPfx')} ${yr}</text>`;
-    const bl = br.map(r=>`${xS(r.year)},${yS(r.portfolioEnd??r.portfolioStart)}`).join(' ');
-    const baseOpacity = sr ? '0.5' : '0.9';
-    let stressLine = '', ed = '';
-    if (sr) {
-      const sl = sr.map(r=>`${xS(r.year)},${yS(r.portfolioEnd??r.portfolioStart)}`).join(' ');
-      stressLine = `<polyline points="${sl}" fill="none" stroke="#c8a96e" stroke-width="1.5" stroke-linejoin="round"/>`;
-      sr.forEach(r => { if (r.event==='cut'||r.event==='raise') { const col=r.event==='cut'?'#c07070':'#70a870'; ed+=`<circle cx="${xS(r.year)}" cy="${yS(r.portfolioEnd)}" r="4" fill="${col}" opacity="0.85"/>`; } });
+  function drawChartEmpty(id) {
+    $(id).innerHTML = `<text x="400" y="100" text-anchor="middle" fill="#888" font-size="13" font-family="sans-serif">${t('chartAdjust')}</text>`;
+  }
+
+  function updateSuccessRate(successRate) {
+    const pct = Math.round(successRate * 100);
+    const col = pct >= 90 ? 'var(--green)' : pct >= 75 ? 'var(--accent)' : 'var(--red)';
+    $('success-rate-val').textContent = pct + '%';
+    $('success-rate-val').style.color = col;
+    $('success-rate-wrap').classList.remove('hidden');
+  }
+
+  function drawUnifiedChart(mc, inp) {
+    const { portPercentiles, wdPercentiles, horizon } = mc;
+    const maxPort = Math.max(inp.savings * 1.05, ...portPercentiles.map(p => p[4]), 1);
+    const xS = v => DPL + (v / horizon) * DIW;
+    const yS = v => DPT + DIH - (Math.max(0, v) / maxPort) * DIH;
+
+    let gl = '', yl = '';
+    for (let i = 0; i <= 4; i++) {
+      const v = maxPort * i / 4, y = yS(v);
+      gl += `<line x1="${DPL}" y1="${y}" x2="${DPL+DIW}" y2="${y}" stroke="#1a1a1a" stroke-width="1"/>`;
+      yl += `<text x="${DPL-8}" y="${y+4}" text-anchor="end" fill="#888" font-size="10">${fmtMoney(v)}</text>`;
     }
-    $('decu-svg').innerHTML = `<clipPath id="dc"><rect x="${DPL}" y="${DPT}" width="${DIW}" height="${DIH}"/></clipPath>${gl}${yl}${xl}<g clip-path="url(#dc)"><polyline points="${bl}" fill="none" stroke="#e8e8e8" stroke-width="1.5" stroke-linejoin="round" opacity="${baseOpacity}"/>${stressLine}${ed}</g><line x1="${DPL}" y1="${DPT}" x2="${DPL}" y2="${DPT+DIH}" stroke="#2a2a2a" stroke-width="1"/><line x1="${DPL}" y1="${DPT+DIH}" x2="${DPL+DIW}" y2="${DPT+DIH}" stroke="#2a2a2a" stroke-width="1"/>`;
+    let xl = ''; const step = horizon <= 20 ? 5 : horizon <= 40 ? 10 : 15;
+    for (let yr = 0; yr <= horizon; yr += step)
+      xl += `<text x="${xS(yr)}" y="${DPT+DIH+18}" text-anchor="middle" fill="#888" font-size="10">${t('chartYrPfx')} ${yr}</text>`;
+
+    const years = Array.from({length: portPercentiles.length}, (_, i) => i);
+    const band = (hi, lo) =>
+      years.map(y => `${xS(y)},${yS(portPercentiles[y][hi])}`).join(' ') + ' ' +
+      [...years].reverse().map(y => `${xS(y)},${yS(portPercentiles[y][lo])}`).join(' ');
+    const med = years.map(y => `${xS(y)},${yS(portPercentiles[y][2])}`).join(' ');
+
+    $('decu-svg').innerHTML =
+      `<clipPath id="dc"><rect x="${DPL}" y="${DPT}" width="${DIW}" height="${DIH}"/></clipPath>` +
+      gl + yl + xl +
+      `<g clip-path="url(#dc)">` +
+      `<polygon points="${band(4,0)}" fill="#c8a96e" opacity="0.10"/>` +
+      `<polygon points="${band(3,1)}" fill="#c8a96e" opacity="0.25"/>` +
+      `<polyline points="${med}" fill="none" stroke="#c8a96e" stroke-width="2" stroke-linejoin="round"/>` +
+      `</g>` +
+      `<line x1="${DPL}" y1="${DPT}" x2="${DPL}" y2="${DPT+DIH}" stroke="#2a2a2a" stroke-width="1"/>` +
+      `<line x1="${DPL}" y1="${DPT+DIH}" x2="${DPL+DIW}" y2="${DPT+DIH}" stroke="#2a2a2a" stroke-width="1"/>`;
 
     const svg = $('decu-svg');
     const hg = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -1142,38 +1038,56 @@
     ov.setAttribute('width', DIW); ov.setAttribute('height', DIH);
     ov.setAttribute('fill', 'transparent'); ov.style.cursor = 'crosshair';
     svg.appendChild(ov);
+
+    const isVariable = MODE !== 'fixed';
+    const pmt = MODE === 'fixed' ? calcPMT(inp.savings, inp.ret, horizon, inp.remain) : 0;
+    const ff = '-apple-system,sans-serif';
+
     ov.addEventListener('mousemove', e => {
       const rect = svg.getBoundingClientRect();
       const mx = (e.clientX - rect.left) * (DCW / rect.width);
-      const yr = Math.max(0, Math.min(maxT, Math.round((mx - DPL) / DIW * maxT)));
-      const bRow = br.find(r => r.year === yr);
-      const sRow = sr ? sr.find(r => r.year === yr) : null;
+      const yr = Math.max(0, Math.min(horizon, Math.round((mx - DPL) / DIW * horizon)));
       const cx = xS(yr);
-      let h = `<line x1="${cx}" y1="${DPT}" x2="${cx}" y2="${DPT+DIH}" stroke="#333" stroke-width="1"/>`;
-      if (bRow) h += `<circle cx="${cx}" cy="${yS(bRow.portfolioEnd??bRow.portfolioStart)}" r="4" fill="#e8e8e8" stroke="#0d0d0d" stroke-width="1.5"/>`;
-      if (sRow) h += `<circle cx="${cx}" cy="${yS(sRow.portfolioEnd??sRow.portfolioStart)}" r="4" fill="#c8a96e" stroke="#0d0d0d" stroke-width="1.5"/>`;
-      const age = bRow?.age ?? (br[0].age + yr);
-      const bVal = bRow ? fmtMoney(bRow.portfolioEnd??bRow.portfolioStart) : t('gDepleted');
+      const age = inp.age + yr;
+      const pp = portPercentiles[yr] || [0,0,0,0,0];
+      const wp = wdPercentiles ? (wdPercentiles[yr] || [0,0,0,0,0]) : null;
       const yrTxt = S.lang === 'zh' ? `${t('chartYrPfx')} ${yr} 年 · 年齡 ${age}` : `yr ${yr}  ·  age ${age}`;
-      const tw = 132, th = sr ? 58 : 42;
+
+      let h = `<line x1="${cx}" y1="${DPT}" x2="${cx}" y2="${DPT+DIH}" stroke="#333" stroke-width="1"/>`;
+      h += `<circle cx="${cx}" cy="${yS(pp[2])}" r="4" fill="#c8a96e" stroke="#0d0d0d" stroke-width="1.5"/>`;
+
+      const tw = 158;
+      const th = yr === 0 ? 40 : (!isVariable ? 88 : 122);
       let tx = cx + 10; if (tx + tw > DPL + DIW - 4) tx = cx - tw - 10;
       const ty = DPT + 8;
+
       h += `<rect x="${tx}" y="${ty}" width="${tw}" height="${th}" rx="3" fill="#1c1c1c" stroke="#3a3a3a" stroke-width="1"/>`;
-      h += `<text x="${tx+8}" y="${ty+14}" fill="#555" font-size="9" font-family="-apple-system,sans-serif">${yrTxt}</text>`;
-      h += `<circle cx="${tx+13}" cy="${ty+27}" r="3" fill="#e8e8e8"/>`;
-      h += `<text x="${tx+22}" y="${ty+31}" fill="#e8e8e8" font-size="10" font-family="-apple-system,sans-serif">${bVal}</text>`;
-      if (sr) {
-        const sVal = sRow ? fmtMoney(sRow.portfolioEnd??sRow.portfolioStart) : t('gDepleted');
-        h += `<circle cx="${tx+13}" cy="${ty+45}" r="3" fill="#c8a96e"/>`;
-        h += `<text x="${tx+22}" y="${ty+49}" fill="#c8a96e" font-size="10" font-family="-apple-system,sans-serif">${sVal}</text>`;
+      h += `<text x="${tx+8}" y="${ty+14}" fill="#555" font-size="9" font-family="${ff}">${yrTxt}</text>`;
+
+      if (yr === 0) {
+        h += `<text x="${tx+8}" y="${ty+30}" fill="#888" font-size="9" font-family="${ff}">Portfolio</text>`;
+        h += `<text x="${tx+tw-8}" y="${ty+30}" text-anchor="end" fill="#c8a96e" font-size="10" font-family="${ff}">${fmtMoney(pp[2])}</text>`;
+      } else if (!isVariable) {
+        h += `<text x="${tx+8}" y="${ty+30}" fill="#888" font-size="9" font-family="${ff}">${t('hoverWithdraw')}</text>`;
+        h += `<text x="${tx+tw-8}" y="${ty+30}" text-anchor="end" fill="#e8e8e8" font-size="10" font-family="${ff}">${fmtMoney(pmt)}</text>`;
+        h += `<text x="${tx+8}" y="${ty+48}" fill="#888" font-size="9" font-family="${ff}">${t('hoverPortEnd')}</text>`;
+        h += `<text x="${tx+tw-8}" y="${ty+62}" text-anchor="end" fill="#999" font-size="9" font-family="${ff}">P90 ${fmtMoney(pp[4])}</text>`;
+        h += `<text x="${tx+tw-8}" y="${ty+74}" text-anchor="end" fill="#c8a96e" font-size="10" font-family="${ff}">P50 ${fmtMoney(pp[2])}</text>`;
+        h += `<text x="${tx+tw-8}" y="${ty+86}" text-anchor="end" fill="#999" font-size="9" font-family="${ff}">P10 ${fmtMoney(pp[0])}</text>`;
+      } else {
+        h += `<text x="${tx+8}" y="${ty+30}" fill="#888" font-size="9" font-family="${ff}">${t('hoverWithdraw')}</text>`;
+        h += `<text x="${tx+tw-8}" y="${ty+44}" text-anchor="end" fill="#999" font-size="9" font-family="${ff}">P90 ${fmtMoney(wp ? wp[4] : 0)}</text>`;
+        h += `<text x="${tx+tw-8}" y="${ty+56}" text-anchor="end" fill="#c8a96e" font-size="10" font-family="${ff}">P50 ${fmtMoney(wp ? wp[2] : 0)}</text>`;
+        h += `<text x="${tx+tw-8}" y="${ty+68}" text-anchor="end" fill="#999" font-size="9" font-family="${ff}">P10 ${fmtMoney(wp ? wp[0] : 0)}</text>`;
+        h += `<text x="${tx+8}" y="${ty+82}" fill="#888" font-size="9" font-family="${ff}">${t('hoverPortEnd')}</text>`;
+        h += `<text x="${tx+tw-8}" y="${ty+96}" text-anchor="end" fill="#999" font-size="9" font-family="${ff}">P90 ${fmtMoney(pp[4])}</text>`;
+        h += `<text x="${tx+tw-8}" y="${ty+108}" text-anchor="end" fill="#c8a96e" font-size="10" font-family="${ff}">P50 ${fmtMoney(pp[2])}</text>`;
+        h += `<text x="${tx+tw-8}" y="${ty+120}" text-anchor="end" fill="#999" font-size="9" font-family="${ff}">P10 ${fmtMoney(pp[0])}</text>`;
       }
       hg.innerHTML = h;
     });
     ov.addEventListener('mouseleave', () => { hg.innerHTML = ''; });
-  }
-
-  function drawChartEmpty(id) {
-    $(id).innerHTML = `<text x="400" y="100" text-anchor="middle" fill="#888" font-size="13" font-family="sans-serif">${t('chartAdjust')}</text>`;
+    $('decu-chart-wrap').classList.remove('hidden');
   }
 
   // ── Monte Carlo ───────────────────────────────────
@@ -1220,7 +1134,7 @@
         // (VPW reaching $0 at the last year is the intended "die with zero" outcome)
         if (port <= 0.01 && y < horizon && !depleted) { depleted = true; port = 0; }
         portByYear[y].push(port);
-        if (MODE === 'vpw') wdByYear[y].push(wd);
+        wdByYear[y].push(wd);
       }
       if (!depleted && port >= inp.remain) successes++;
     }
@@ -1235,67 +1149,11 @@
     return {
       successRate:     successes / N,
       portPercentiles: portByYear.map(computePct),
-      wdPercentiles:   MODE === 'vpw' ? wdByYear.map(computePct) : null,
+      wdPercentiles:   wdByYear.map(computePct),
       horizon, N,
     };
   }
 
-  function drawFanChart(svgId, clipId, percentiles, horizon, maxV) {
-    if (maxV <= 0) maxV = 1;
-    const xS = v => DPL + (v / horizon) * DIW;
-    const yS = v => DPT + DIH - (Math.max(0, v) / maxV) * DIH;
-    let gl = '', yl = '';
-    for (let i = 0; i <= 4; i++) {
-      const v = maxV * i / 4, y = yS(v);
-      gl += `<line x1="${DPL}" y1="${y}" x2="${DPL+DIW}" y2="${y}" stroke="#1a1a1a" stroke-width="1"/>`;
-      yl += `<text x="${DPL-8}" y="${y+4}" text-anchor="end" fill="#888" font-size="10">${fmtMoney(v)}</text>`;
-    }
-    let xl = ''; const step = horizon <= 20 ? 5 : horizon <= 40 ? 10 : 15;
-    for (let yr = 0; yr <= horizon; yr += step)
-      xl += `<text x="${xS(yr)}" y="${DPT+DIH+18}" text-anchor="middle" fill="#888" font-size="10">${t('chartYrPfx')} ${yr}</text>`;
-    const Y = percentiles.length;
-    const years = Array.from({length: Y}, (_, i) => i);
-    const band = (hi, lo) =>
-      years.map(y => `${xS(y)},${yS(percentiles[y][hi])}`).join(' ') + ' ' +
-      [...years].reverse().map(y => `${xS(y)},${yS(percentiles[y][lo])}`).join(' ');
-    const med = years.map(y => `${xS(y)},${yS(percentiles[y][2])}`).join(' ');
-    $(svgId).innerHTML =
-      `<clipPath id="${clipId}"><rect x="${DPL}" y="${DPT}" width="${DIW}" height="${DIH}"/></clipPath>` +
-      gl + yl + xl +
-      `<g clip-path="url(#${clipId})">` +
-      `<polygon points="${band(4,0)}" fill="#c8a96e" opacity="0.10"/>` +
-      `<polygon points="${band(3,1)}" fill="#c8a96e" opacity="0.25"/>` +
-      `<polyline points="${med}" fill="none" stroke="#c8a96e" stroke-width="2" stroke-linejoin="round"/>` +
-      `</g>` +
-      `<line x1="${DPL}" y1="${DPT}" x2="${DPL}" y2="${DPT+DIH}" stroke="#2a2a2a" stroke-width="1"/>` +
-      `<line x1="${DPL}" y1="${DPT+DIH}" x2="${DPL+DIW}" y2="${DPT+DIH}" stroke="#2a2a2a" stroke-width="1"/>`;
-  }
-
-  function renderMCResults(mc, inp) {
-    const { successRate, portPercentiles, wdPercentiles, horizon, N } = mc;
-    const pct = Math.round(successRate * 100);
-    const col = pct >= 90 ? 'var(--green)' : pct >= 75 ? 'var(--accent)' : 'var(--red)';
-    $('mc-success-val').textContent = pct + '%';
-    $('mc-success-val').style.color = col;
-    $('mc-success-lbl').textContent = t('mcSuccessRate');
-    $('mc-desc-text').textContent   = MODE === 'vpw' ? t('mcVpwNote') : t('mcDesc');
-
-    const maxPort = Math.max(inp.savings * 1.05, ...portPercentiles.map(p => p[4]), 1);
-    drawFanChart('mc-port-svg', 'mcp', portPercentiles, horizon, maxPort);
-
-    if (MODE === 'vpw' && wdPercentiles) {
-      const maxWd = Math.max(...wdPercentiles.slice(1).map(p => p[4]), 1);
-      drawFanChart('mc-wd-svg', 'mcw', wdPercentiles, horizon, maxWd * 1.1);
-      $('mc-wd-header').textContent = t('mcSpendTitle');
-      $('mc-wd-header').classList.remove('hidden');
-      $('mc-wd-svg').classList.remove('hidden');
-    } else {
-      $('mc-wd-header').classList.add('hidden');
-      $('mc-wd-svg').classList.add('hidden');
-    }
-
-    $('mc-wrap').classList.remove('hidden');
-  }
 
   // ── Gist / Persist ────────────────────────────────
   function ghFetch(p,path,o={}){return fetch(API+path,{...o,headers:{'Authorization':`token ${p}`,'Content-Type':'application/json',...(o.headers||{})}});}
