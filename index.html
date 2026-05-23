@@ -92,6 +92,7 @@
     .preset-btn { background: none; border: 1px solid var(--border2); color: var(--muted2); padding: 3px 9px; font-size: 0.62rem; letter-spacing: 0.04em; cursor: pointer; border-radius: 3px; transition: all 0.15s; white-space: nowrap; font-family: inherit; }
     .preset-btn:hover { color: var(--muted); border-color: #444; }
     .preset-btn.active { background: var(--border2); color: var(--accent); border-color: var(--border2); }
+    .return-sigma-group { border: 1px solid var(--border2); border-radius: 4px; padding: 12px; display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
     .mc-legend { display: flex; gap: 14px; flex-wrap: wrap; }
     .mc-leg-item { display: flex; align-items: center; gap: 5px; font-size: 0.68rem; color: var(--muted); }
     .mc-leg-swatch { display: inline-block; width: 14px; height: 8px; border-radius: 2px; }
@@ -218,30 +219,32 @@
             <input type="number" id="i-savings" min="0" step="10000" value="1000000">
           </div>
         </div>
-        <div class="input-row">
-          <div class="label-row">
-            <label class="form-label" id="label-return"></label>
-            <button class="tip-btn" data-tip="ret">?</button>
+        <div class="return-sigma-group">
+          <div>
+            <div class="label-row" style="margin-bottom:6px">
+              <label class="form-label" id="label-return"></label>
+              <button class="tip-btn" data-tip="ret">?</button>
+            </div>
+            <div class="slider-row">
+              <input type="range" id="i-return" min="1" max="15" step="0.5" value="10">
+              <span class="slider-val" id="v-return">10%</span>
+            </div>
+            <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;margin-top:8px">
+              <button class="preset-btn" data-ret="5" data-sigma="8" onclick="setReturnPreset(5,8)" id="preset-conservative"></button>
+              <button class="preset-btn" data-ret="8" data-sigma="18" onclick="setReturnPreset(8,18)">VT &nbsp;8%</button>
+              <button class="preset-btn" data-ret="12" data-sigma="23" onclick="setReturnPreset(12,23)">0050 &nbsp;12%</button>
+              <button class="tip-btn" data-tip="presets" style="margin-left:2px">?</button>
+            </div>
           </div>
-          <div class="slider-row">
-            <input type="range" id="i-return" min="1" max="15" step="0.5" value="10">
-            <span class="slider-val" id="v-return">10%</span>
-          </div>
-          <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;margin-top:6px">
-            <button class="preset-btn" data-ret="5" data-sigma="8" onclick="setReturnPreset(5,8)" id="preset-conservative"></button>
-            <button class="preset-btn" data-ret="8" data-sigma="18" onclick="setReturnPreset(8,18)">VT &nbsp;8%</button>
-            <button class="preset-btn" data-ret="12" data-sigma="23" onclick="setReturnPreset(12,23)">0050 &nbsp;12%</button>
-            <button class="tip-btn" data-tip="presets" style="margin-left:2px">?</button>
-          </div>
-        </div>
-        <div class="input-row">
-          <div class="label-row">
-            <label class="form-label" id="label-sigma"></label>
-            <button class="tip-btn" data-tip="sigma">?</button>
-          </div>
-          <div class="slider-row">
-            <input type="range" id="i-sigma" min="3" max="35" step="0.5" value="15">
-            <span class="slider-val" id="v-sigma">15%</span>
+          <div>
+            <div class="label-row" style="margin-bottom:6px">
+              <label class="form-label" id="label-sigma"></label>
+              <button class="tip-btn" data-tip="sigma">?</button>
+            </div>
+            <div class="slider-row">
+              <input type="range" id="i-sigma" min="3" max="35" step="0.5" value="15">
+              <span class="slider-val" id="v-sigma">15%</span>
+            </div>
           </div>
         </div>
         <div class="input-row">
@@ -809,7 +812,7 @@
       else if (cr < lt) { spend *= 1.10; ev = 'raise'; }
       const wd = Math.min(spend, port);  // withdraw at start of year
       const pe = Math.max(0, (port - wd) * (1 + ret));  // remainder grows
-      rows.push({year:y, age:sa+y, portfolioStart:port, currentRate:cr*100, withdraw:spend, event:ev, portfolioEnd:pe});
+      rows.push({year:y, age:sa+y, portfolioStart:port, currentRate:cr*100, withdraw:wd, event:ev, portfolioEnd:pe});
       port = pe;
       if (port <= 0) break;
     }
@@ -906,8 +909,12 @@
     if (!ok) return;
     const mc = runMonteCarlo(inp);
     drawUnifiedChart(mc, inp);
-    updateSuccessRate(mc.successRate);
-    if (MODE === 'vpw') renderVpwSummaryMC(inp, mc);
+    if (MODE === 'vpw') {
+      $('success-rate-wrap').classList.add('hidden');
+      renderVpwSummaryMC(inp, mc);
+    } else {
+      updateSuccessRate(mc.successRate);
+    }
   }
 
   function calcFixed(inp) {
@@ -1158,7 +1165,7 @@
         portByYear[y].push(port);
         wdByYear[y].push(wd);
       }
-      if (!depleted && port >= inp.remain) successes++;
+      if (!depleted && port >= (MODE === 'fixed' ? inp.remain : 0)) successes++;
     }
 
     const pcts = [5, 25, 50, 75, 95];
