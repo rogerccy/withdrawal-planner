@@ -841,13 +841,9 @@
 
   function calcVpw(inp) {
     const horizon = Math.max(1, Math.round(inp.deathAge - inp.age));
-    const sr = Math.max(0, inp.ret - 0.03);
-
-    lastBaseRows   = simulateVpw(inp.savings, inp.ret, horizon, inp.age);
-    lastStressRows = simulateVpw(inp.savings, sr,      horizon, inp.age);
-
+    lastBaseRows = simulateVpw(inp.savings, inp.ret, horizon, inp.age);
     renderVpwResults(inp, lastBaseRows, horizon);
-    renderVpwSummary(inp, lastBaseRows, lastStressRows);
+    // summary rendered by renderVpwSummaryMC after Monte Carlo runs
   }
 
   // ── Render: VPW ──────────────────────────────────
@@ -864,25 +860,33 @@
     $('results-content').innerHTML = html;
   }
 
-  function renderVpwSummary(inp, baseRows, stressRows) {
+  function renderVpwSummaryMC(inp, mc) {
     const el = $('mode-extra'); if (!el) return;
     if (inp.ret <= 0) {
       el.innerHTML = `<div class="banner warning">${t('vpwLowReturn')}</div>`;
       return;
     }
-    const sum = rows => {
-      const spending = rows.filter(r => r.year > 0).map(r => r.withdraw);
-      return { first: spending[0] || 0, min: Math.min(...spending) };
-    };
-    const b = sum(baseRows), s = sum(stressRows);
-    const sr = Math.max(0, inp.ret - 0.03);
+    // wdPercentiles[year] = [p5, p25, p50, p75, p95]
+    const P25 = 1, P50 = 2;
+    const horizon = mc.horizon;
+    const yr1Med = mc.wdPercentiles[1]?.[P50] ?? 0;
+    const yr1P25 = mc.wdPercentiles[1]?.[P25] ?? 0;
+    let minMed = Infinity, minP25 = Infinity;
+    for (let y = 1; y <= horizon; y++) {
+      const p = mc.wdPercentiles[y];
+      if (!p) continue;
+      if (p[P50] > 0) minMed = Math.min(minMed, p[P50]);
+      if (p[P25] > 0) minP25 = Math.min(minP25, p[P25]);
+    }
+    if (!isFinite(minMed)) minMed = 0;
+    if (!isFinite(minP25)) minP25 = 0;
     el.innerHTML = `<div class="g-summary">
-      <div class="g-card"><div class="g-card-title">${t('scenBase')} (${(inp.ret*100).toFixed(1)}%)</div>
-        <div class="g-card-row"><span>${t('gFirstYear')}</span><span>${fmtMoney(b.first)}</span></div>
-        <div class="g-card-row"><span>${t('gMinYear')}</span><span>${fmtMoney(b.min)}</span></div></div>
-      <div class="g-card"><div class="g-card-title">${t('scenStress')} (${(sr*100).toFixed(1)}%)</div>
-        <div class="g-card-row"><span>${t('gFirstYear')}</span><span>${fmtMoney(s.first)}</span></div>
-        <div class="g-card-row"><span>${t('gMinYear')}</span><span style="color:#c07070">${fmtMoney(s.min)}</span></div></div>
+      <div class="g-card"><div class="g-card-title">${t('scenBase')} · 50th</div>
+        <div class="g-card-row"><span>${t('gFirstYear')}</span><span>${fmtMoney(yr1Med)}</span></div>
+        <div class="g-card-row"><span>${t('gMinYear')}</span><span>${fmtMoney(minMed)}</span></div></div>
+      <div class="g-card"><div class="g-card-title">${t('scenStress')} · 25th</div>
+        <div class="g-card-row"><span>${t('gFirstYear')}</span><span>${fmtMoney(yr1P25)}</span></div>
+        <div class="g-card-row"><span>${t('gMinYear')}</span><span style="color:#c07070">${fmtMoney(minP25)}</span></div></div>
     </div>`;
   }
 
@@ -903,6 +907,7 @@
     const mc = runMonteCarlo(inp);
     drawUnifiedChart(mc, inp);
     updateSuccessRate(mc.successRate);
+    if (MODE === 'vpw') renderVpwSummaryMC(inp, mc);
   }
 
   function calcFixed(inp) {
