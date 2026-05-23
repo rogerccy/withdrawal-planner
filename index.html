@@ -1100,18 +1100,18 @@
         h += `<text x="${tx+8}" y="${ty+30}" fill="#888" font-size="9" font-family="${ff}">${t('hoverWithdraw')}</text>`;
         h += `<text x="${tx+tw-8}" y="${ty+30}" text-anchor="end" fill="#e8e8e8" font-size="10" font-family="${ff}">${fmtMoney(pmt)}</text>`;
         h += `<text x="${tx+8}" y="${ty+48}" fill="#888" font-size="9" font-family="${ff}">${t('hoverPortEnd')}</text>`;
-        h += `<text x="${tx+tw-8}" y="${ty+62}" text-anchor="end" fill="#999" font-size="9" font-family="${ff}">P90 ${fmtMoney(pp[4])}</text>`;
+        h += `<text x="${tx+tw-8}" y="${ty+62}" text-anchor="end" fill="#999" font-size="9" font-family="${ff}">P95 ${fmtMoney(pp[4])}</text>`;
         h += `<text x="${tx+tw-8}" y="${ty+74}" text-anchor="end" fill="#c8a96e" font-size="10" font-family="${ff}">P50 ${fmtMoney(pp[2])}</text>`;
-        h += `<text x="${tx+tw-8}" y="${ty+86}" text-anchor="end" fill="#999" font-size="9" font-family="${ff}">P10 ${fmtMoney(pp[0])}</text>`;
+        h += `<text x="${tx+tw-8}" y="${ty+86}" text-anchor="end" fill="#999" font-size="9" font-family="${ff}">P5 ${fmtMoney(pp[0])}</text>`;
       } else {
         h += `<text x="${tx+8}" y="${ty+30}" fill="#888" font-size="9" font-family="${ff}">${t('hoverWithdraw')}</text>`;
-        h += `<text x="${tx+tw-8}" y="${ty+44}" text-anchor="end" fill="#999" font-size="9" font-family="${ff}">P90 ${fmtMoney(wp ? wp[4] : 0)}</text>`;
+        h += `<text x="${tx+tw-8}" y="${ty+44}" text-anchor="end" fill="#999" font-size="9" font-family="${ff}">P95 ${fmtMoney(wp ? wp[4] : 0)}</text>`;
         h += `<text x="${tx+tw-8}" y="${ty+56}" text-anchor="end" fill="#c8a96e" font-size="10" font-family="${ff}">P50 ${fmtMoney(wp ? wp[2] : 0)}</text>`;
-        h += `<text x="${tx+tw-8}" y="${ty+68}" text-anchor="end" fill="#999" font-size="9" font-family="${ff}">P10 ${fmtMoney(wp ? wp[0] : 0)}</text>`;
+        h += `<text x="${tx+tw-8}" y="${ty+68}" text-anchor="end" fill="#999" font-size="9" font-family="${ff}">P5 ${fmtMoney(wp ? wp[0] : 0)}</text>`;
         h += `<text x="${tx+8}" y="${ty+82}" fill="#888" font-size="9" font-family="${ff}">${t('hoverPortEnd')}</text>`;
-        h += `<text x="${tx+tw-8}" y="${ty+96}" text-anchor="end" fill="#999" font-size="9" font-family="${ff}">P90 ${fmtMoney(pp[4])}</text>`;
+        h += `<text x="${tx+tw-8}" y="${ty+96}" text-anchor="end" fill="#999" font-size="9" font-family="${ff}">P95 ${fmtMoney(pp[4])}</text>`;
         h += `<text x="${tx+tw-8}" y="${ty+108}" text-anchor="end" fill="#c8a96e" font-size="10" font-family="${ff}">P50 ${fmtMoney(pp[2])}</text>`;
-        h += `<text x="${tx+tw-8}" y="${ty+120}" text-anchor="end" fill="#999" font-size="9" font-family="${ff}">P10 ${fmtMoney(pp[0])}</text>`;
+        h += `<text x="${tx+tw-8}" y="${ty+120}" text-anchor="end" fill="#999" font-size="9" font-family="${ff}">P5 ${fmtMoney(pp[0])}</text>`;
       }
       hg.innerHTML = h;
     });
