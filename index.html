@@ -327,7 +327,10 @@
 
     <div class="chart-wrap hidden" id="decu-chart-wrap">
       <div class="chart-header">
-        <div class="chart-title" id="chart-decu-title"></div>
+        <div>
+          <div class="chart-title" id="chart-decu-title"></div>
+          <p id="chart-real-note" style="font-size:0.63rem;color:var(--muted2);margin-top:3px;letter-spacing:0.02em"></p>
+        </div>
         <div class="mc-legend" id="chart-legend">
           <span class="mc-leg-item"><span class="mc-leg-swatch" style="background:var(--accent);opacity:0.22"></span> <span id="mc-leg-outer"></span></span>
           <span class="mc-leg-item"><span class="mc-leg-swatch" style="background:var(--accent);opacity:0.45"></span> <span id="mc-leg-inner"></span></span>
@@ -426,6 +429,7 @@
       mcLegMed:           'Median',
       hoverWithdraw:      'Withdraw (Jan 1)',
       hoverPortEnd:       'End Balance',
+      chartRealNote:      'Amounts in today\'s dollars · inflation-adjusted',
       syncing:            'syncing…',
       synced:             'synced ✓',
       syncFailed:         'sync failed',
@@ -509,6 +513,7 @@
       mcLegMed:           '中位數',
       hoverWithdraw:      '年初提領',
       hoverPortEnd:       '期末資產',
+      chartRealNote:      '金額均為今日幣值（實質，已扣除通膨）',
       syncing:            '同步中…',
       synced:             '已同步 ✓',
       syncFailed:         '同步失敗',
@@ -587,6 +592,7 @@
     $('label-lower').textContent     = t('labelLower');
 
     $('chart-decu-title').textContent  = t('chartDecu');
+    $('chart-real-note').textContent   = t('chartRealNote');
 
     $('timing-note').textContent         = t('timingNote');
     $('label-sigma').textContent         = t('labelSigma');
