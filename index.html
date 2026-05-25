@@ -281,6 +281,7 @@
           <div class="input-row" style="margin-bottom:0">
             <div class="label-row">
               <label class="form-label" id="label-withdraw"></label>
+              <button class="tip-btn" data-tip="withdraw">?</button>
               <button class="preset-btn" id="auto-withdraw-btn" onclick="autoCalcWithdraw()" style="margin-left:auto;font-size:0.6rem;padding:2px 8px"></button>
             </div>
             <div class="slider-row">
@@ -330,7 +331,10 @@
         <div id="results-content"></div>
         <div id="success-rate-wrap" class="hidden" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
           <div style="display:flex;justify-content:space-between;align-items:center">
-            <span class="form-label" id="label-success-rate"></span>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span class="form-label" id="label-success-rate"></span>
+              <button class="tip-btn" data-tip="successRate">?</button>
+            </div>
             <span id="success-rate-val" style="font-size:1.8rem;font-weight:200;line-height:1;font-variant-numeric:tabular-nums"></span>
           </div>
         </div>
@@ -586,8 +590,12 @@
       zh: { title: '提領策略說明', body: '<b>固定年金</b> — 每年提領相同金額（調整通膨）。穩定可預測，但報酬不如預期時可能提早耗盡。\n\n<b>護欄策略</b> — 以設定提領率為基準，投資組合落後時削減 10%，成長時提高 10%，動態適應市場。\n\n<b>變動提領 (VPW)</b> — 每年依剩餘年數重新計算提領比例，目標在設定年齡時精確花光資產。' }
     },
     mc: {
-      en: { title: 'Monte Carlo Simulation', body: 'Runs 500 independent simulations entirely in your browser — no server, instant on every input change.\n\nEach simulation draws a random annual return from a lognormal distribution using your CAGR and σ. Returns are independent year-to-year (no autocorrelation).\n\nThe fan chart shows the 5th / 25th / 50th (median) / 75th / 95th percentile portfolio balance across all 500 paths. Success rate = % of simulations where the portfolio survives to your target age.' },
-      zh: { title: 'Monte Carlo 模擬', body: '每次調整參數，瀏覽器即時在本機跑 500 次獨立模擬，不需要伺服器。\n\n每次模擬以你設定的 CAGR 與 σ，從對數常態分布隨機抽取每年報酬率（年與年之間獨立，無自相關）。\n\n扇形圖顯示 500 條路徑的第 5 / 25 / 50（中位數）/ 75 / 95 百分位資產餘額。成功率 = 投資組合撐到目標年齡的模擬比例。' }
+      en: { title: 'Monte Carlo Simulation', body: 'Runs 500 independent simulations live in your browser — no server, recalculated on every input change.\n\nEach run draws random annual returns from a lognormal distribution (your CAGR and sigma). Returns are independent year-to-year.\n\nThe fan shows the 5th / 25th / 50th / 75th / 95th percentile portfolio balance across all 500 paths.' },
+      zh: { title: 'Monte Carlo 模擬', body: '每次調整參數，瀏覽器即時在本機跑 500 次獨立模擬，不需要伺服器。\n\n每次模擬以你設定的 CAGR 與 sigma，從對數常態分布隨機抽取每年報酬率，年與年之間獨立。\n\n扇形圖顯示 500 條路徑的第 5 / 25 / 50 / 75 / 95 百分位資產餘額。' }
+    },
+    successRate: {
+      en: { title: 'Success Rate', body: 'Percentage of the 500 Monte Carlo simulations where the portfolio survives to your target age without depleting.\n\n90%+ is generally considered safe. Below 75% suggests the withdrawal amount may be too aggressive for the given return assumptions.' },
+      zh: { title: '成功率', body: '500 次 Monte Carlo 模擬中，投資組合在目標年齡前未耗盡的比例。\n\n一般建議 90% 以上為安全；低於 75% 表示在當前報酬率假設下，提領金額可能過於積極。' }
     },
   };
 
