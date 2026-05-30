@@ -655,6 +655,8 @@
     $('chart-real-note').textContent   = chartMode === 'real' ? t('chartRealNote') : t('chartNominalNote');
     $('btn-mode-real').textContent     = t('chartModeReal');
     $('btn-mode-nominal').textContent  = t('chartModeNominal');
+    $('btn-mode-real').classList.toggle('active', chartMode === 'real');
+    $('btn-mode-nominal').classList.toggle('active', chartMode === 'nominal');
 
     $('timing-note').textContent         = t('timingNote');
     $('label-sigma').textContent         = t('labelSigma');
