@@ -844,8 +844,8 @@ let chartMode = 'real', lastMC = null, lastInp = null;
   $('sync-btn').onclick = () => { if (S.pat && S.gistId) pullGist(); };
 
   function getInputs() {
-    const nominal   = Math.max(0, +$('i-return').value    || 10);
-    const inflation = Math.max(0, +$('i-inflation').value || 3);
+    const nominal   = Math.max(0, +$('i-return').value);
+    const inflation = Math.max(0, +$('i-inflation').value);
     return {
       age:       Math.max(0,    +$('i-age').value      || 50),
       savings:   Math.max(0,    +$('i-savings').value  || 0),
